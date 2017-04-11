@@ -46,6 +46,20 @@ public class Game {
     public boolean canMoveToFoundation(int targetFoundation){
         return this.targetPile[targetFoundation].canAccept(this.sourcePile.peek());
     }
+    public boolean canMoveToFoundation(int targetFoundation, int stack, int index){
+        return this.targetPile[targetFoundation].canAccept(this.cardStack[stack].peek(index));
+    }
+
+
+    public boolean canMoveToStack(int targetStack){
+        return this.cardStack[targetStack].canAccept(this.sourcePile.peek());
+    }
+    public boolean canMoveToStack(int targetStack, int foundation){
+        return this.cardStack[targetStack].canAccept(this.targetPile[foundation].peek());
+    }
+    public boolean canMoveToStack(int targetStack, int stack, int index){
+        return this.cardStack[targetStack].canAccept(this.cardStack[stack].peek(index));
+    }
 
     /* COMMANDS */
     public void undo(){
@@ -107,7 +121,55 @@ public class Game {
         });
     }
 
-    public void moveToFoundation(int foundation, int stack, int index){
+    public void moveToFoundation(int targetFoundation, int stack, int index){
+        invoker.execute(new Commander.Command() {
+
+            @Override
+            public void execute() {
+
+            }
+
+            @Override
+            public void undo() {
+
+            }
+        });
+    }
+
+    public void moveToStack(int targetStack){
+        SourcePile sp = this.sourcePile;
+        CardStack cs = this.cardStack[targetStack];
+        invoker.execute(new Commander.Command() {
+            @Override
+            public void execute() {
+                cs.put(sp.remove());
+            }
+
+            @Override
+            public void undo() {
+                sp.put(cs.remove());
+            }
+        });
+    }
+
+    public void moveToStack(int targetStack, int foundation){
+        CardStack cs = this.cardStack[targetStack];
+        TargetPile tp = this.targetPile[foundation];
+        invoker.execute(new Commander.Command() {
+
+            @Override
+            public void execute() {
+                cs.put(tp.remove());
+            }
+
+            @Override
+            public void undo() {
+                tp.put(cs.remove());
+            }
+        });
+    }
+
+    public void moveToStack(int targetStack, int stack, int index){
 
         invoker.execute(new Commander.Command() {
 

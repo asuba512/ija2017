@@ -4,8 +4,8 @@ package ija2017.model;
  * Created by xsubaa00 on 10/04/17.
  */
 public class TargetPile extends CardPile {
-    private Card.Color pileColor;
     private int sequence;
+    private Card.Color pileColor;
 
     public TargetPile(){
         sequence = 1;
@@ -35,6 +35,10 @@ public class TargetPile extends CardPile {
                 return false;
             return true;
         }
+        return false;
+    }
+
+    public boolean canAccept(CardStack cs){
         return false;
     }
 }
