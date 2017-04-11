@@ -1,5 +1,7 @@
 package ija2017.model;
 
+import b.c.T;
+
 import java.util.*;
 
 /**
@@ -25,7 +27,7 @@ public class Game {
             this.cardStack[i] = new CardStack();
             for (int j = 0; j < i + 1; j++)
                 this.cardStack[i].put(deck.pop());
-            this.cardStack[i].flipTopCard(); // flip top card face up
+            this.cardStack[i].turnFaceUpTopCard(); // flip top card face up
         }
         this.faceDownPile.put(deck);
     }
@@ -44,20 +46,37 @@ public class Game {
     }
 
     public boolean canMoveToFoundation(int targetFoundation){
+        if(this.sourcePile.isEmpty())
+            return false;
         return this.targetPile[targetFoundation].canAccept(this.sourcePile.peek());
     }
+    public boolean canMoveToFoundation(int targetFoundation, int foundation){
+        if(this.targetPile[foundation].isEmpty())
+            return false;
+        return this.targetPile[targetFoundation].canAccept(this.targetPile[foundation].peek());
+    }
     public boolean canMoveToFoundation(int targetFoundation, int stack, int index){
-        return this.targetPile[targetFoundation].canAccept(this.cardStack[stack].peek(index));
+        if(this.cardStack[stack].isEmpty())
+            return false;
+        if(index != this.cardStack[stack].size() - 1) // foundation can accept only single card
+            return false;
+        return this.targetPile[targetFoundation].canAccept(this.cardStack[stack].peek());
     }
 
 
     public boolean canMoveToStack(int targetStack){
+        if(this.sourcePile.isEmpty())
+            return false;
         return this.cardStack[targetStack].canAccept(this.sourcePile.peek());
     }
     public boolean canMoveToStack(int targetStack, int foundation){
+        if(this.targetPile[foundation].isEmpty())
+            return false;
         return this.cardStack[targetStack].canAccept(this.targetPile[foundation].peek());
     }
     public boolean canMoveToStack(int targetStack, int stack, int index){
+        if(this.cardStack[stack].isEmpty() || this.cardStack[stack].size() <= index)
+            return false;
         return this.cardStack[targetStack].canAccept(this.cardStack[stack].peek(index));
     }
 
@@ -104,6 +123,10 @@ public class Game {
         });
     }
 
+    /*
+     * Check using can*() methods must be performed before executing any following command
+    */
+
     public void moveToFoundation(int targetFoundation){
         SourcePile sp = this.sourcePile;
         TargetPile tp = this.targetPile[targetFoundation];
@@ -121,17 +144,40 @@ public class Game {
         });
     }
 
-    public void moveToFoundation(int targetFoundation, int stack, int index){
+    public void moveToFoundation(int targetFoundation, int foundation){
+        TargetPile sp = this.targetPile[foundation];
+        TargetPile tp = this.targetPile[targetFoundation];
         invoker.execute(new Commander.Command() {
 
             @Override
             public void execute() {
-
+                tp.put(sp.remove());
             }
 
             @Override
             public void undo() {
+                sp.put(tp.remove());
+            }
+        });
+    }
 
+    /* only one card is going to be moved, checked before using canMoveToFoundation() */
+    public void moveToFoundation(int targetFoundation, int stack, int index){
+        CardStack cs = this.cardStack[stack];
+        TargetPile tp = this.targetPile[targetFoundation];
+        invoker.execute(new Commander.Command() {
+            boolean flipped;
+            @Override
+            public void execute() {
+                tp.put(cs.remove());
+                flipped = cs.turnFaceUpTopCard(); // true/false if was flipped or not
+            }
+
+            @Override
+            public void undo() {
+                if(flipped)
+                    cs.turnFaceDownTopCard();
+                cs.forcePut(tp.remove());
             }
         });
     }
@@ -170,17 +216,21 @@ public class Game {
     }
 
     public void moveToStack(int targetStack, int stack, int index){
-
+        CardStack ts = this.cardStack[targetStack];
+        CardStack ss = this.cardStack[stack];
         invoker.execute(new Commander.Command() {
-
+            boolean flipped;
             @Override
             public void execute() {
-
+                ts.put(ss.remove(index));
+                flipped = ss.turnFaceUpTopCard();
             }
 
             @Override
             public void undo() {
-
+                if(flipped)
+                    ss.turnFaceDownTopCard();
+                ss.put(ts.remove(index));
             }
         });
     }
