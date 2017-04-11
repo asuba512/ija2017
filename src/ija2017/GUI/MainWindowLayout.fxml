@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.MainWindowController">
+   <top>
+       <ToolBar style="-fx-background-color: #e8e8e8;" BorderPane.alignment="CENTER">
+           <Button fx:id="newGameButton" mnemonicParsing="false" onAction="#newGameClick" text="New game" />
+           <Button fx:id="loadGameButton" mnemonicParsing="false" onAction="#loadGameClick" text="Load game" />
+       </ToolBar>
+   </top>
+   <center>
+       <GridPane fx:id="gameGrid" style="-fx-background-color: brown;" BorderPane.alignment="CENTER">
+           <columnConstraints>
+               <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
+               <ColumnConstraints hgrow="SOMETIMES" percentWidth="0.0" />
+           </columnConstraints>
+           <rowConstraints>
+               <RowConstraints percentHeight="100.0" />
+               <RowConstraints percentHeight="0.0" vgrow="SOMETIMES" />
+           </rowConstraints>
+       </GridPane>
+   </center>
+</BorderPane>
