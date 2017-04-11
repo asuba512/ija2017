@@ -5,7 +5,7 @@ import java.util.LinkedList;
 /**
  * Created by xsubaa00 on 10/04/17.
  */
-public class FaceDownPile extends CardPile {
+public class FaceDownPile extends CardPile implements java.io.Serializable {
     @Override
     public boolean put(Card c) {
         c.turnFaceDown();

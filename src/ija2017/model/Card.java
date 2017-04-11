@@ -1,6 +1,6 @@
 package ija2017.model;
 
-public class Card {
+public class Card implements java.io.Serializable {
     private Color color;
     private int value;
     private boolean isUp = false;

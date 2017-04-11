@@ -2,7 +2,7 @@ package ija2017.model;
 
 import java.util.LinkedList;
 
-public class CardStack extends CardDeck {
+public class CardStack extends CardDeck implements java.io.Serializable {
 
     public boolean turnFaceUpTopCard(){
         if(this.deck.isEmpty()) return false;

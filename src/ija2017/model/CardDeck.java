@@ -2,7 +2,7 @@ package ija2017.model;
 
 import java.util.LinkedList;
 
-public class CardDeck {
+public class CardDeck implements java.io.Serializable {
     protected LinkedList<Card> deck;
 
     public CardDeck(){

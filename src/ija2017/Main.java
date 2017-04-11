@@ -2,6 +2,7 @@ package ija2017;
 
 import ija2017.model.Game;
 
+import java.io.*;
 import java.util.Scanner;
 
 public class Main {
@@ -10,7 +11,22 @@ public class Main {
         Scanner scan = new Scanner(System.in);
         int opt;
         int tmp, tmp2, tmp3;
-        Game gm1 = new Game();
+        //Game gm1 = new Game();
+        Game gm1 = null;
+        try {
+            FileInputStream fileIn = new FileInputStream("/tmp/employee.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            gm1 = (Game) in.readObject();
+            in.close();
+            fileIn.close();
+        }catch(IOException i) {
+            i.printStackTrace();
+            return;
+        }catch(ClassNotFoundException c) {
+            System.out.println("Employee class not found");
+            c.printStackTrace();
+            return;
+        }
         String menu = "Options:\n\t0 Print game\n\t-1 Undo\n\t1 Turn Next Card\n\t2 Move SourcePile to TargetPile\n\t" +
                 "3 Move SourcePile to CardStack\n\t4 Move TargetPile to CardStack\n\t5 Move CardStack to CardStack\n\t" +
                 "6 Move CardStack to TargetPile\n\t-2 End";
@@ -83,6 +99,17 @@ public class Main {
                     break;
             }
             System.out.println(menu);
+        }
+        try {
+            FileOutputStream fileOut =
+                    new FileOutputStream("/tmp/employee.ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(gm1);
+            out.close();
+            fileOut.close();
+            System.out.printf("Serialized data is saved in /tmp/employee.ser");
+        }catch(IOException i) {
+            i.printStackTrace();
         }
     }
 }

@@ -2,18 +2,19 @@ package ija2017.model;
 
 import b.c.T;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
  * Created by xsubaa00 on 10/04/17.
  */
-public class Game {
+public class Game implements java.io.Serializable {
     private CardStack[] cardStack = new CardStack[7];
     private TargetPile[] targetPile = new TargetPile[4];
     private SourcePile sourcePile;
     private FaceDownPile faceDownPile;
 
-    private final Commander.Invoker invoker = new Commander.Invoker();
+    private transient Commander.Invoker invoker = new Commander.Invoker();
 
     public Game(){
         this.sourcePile = new SourcePile();
@@ -233,5 +234,10 @@ public class Game {
                 ss.put(ts.remove(index));
             }
         });
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
+        in.defaultReadObject();
+        this.invoker = new Commander.Invoker();
     }
 }
