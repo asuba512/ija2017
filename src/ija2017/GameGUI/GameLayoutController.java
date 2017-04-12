@@ -404,9 +404,7 @@ public class GameLayoutController implements Initializable {
         img.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
         img.setFitWidth(cardWidth);
         img.setFitHeight(cardHeight);
-        FoundationPile pile = game.getFoundationPile(i);
         for(int j = 0; j < cardTargetPiles.get(i).size(); j++) {
-            String filename = pile.forcePeek(j).toString();
             ImageView card;
             card = cardTargetPiles.get(i).get(j);
             card.toFront();
@@ -414,8 +412,6 @@ public class GameLayoutController implements Initializable {
             card.setLayoutX(xCoords[i+3]);
             card.setFitWidth(cardWidth);
             card.setFitHeight(cardHeight);
-            if (img.getImage() != CardImages.get().cardImages.get(filename))
-                img.setImage(CardImages.get().cardImages.get(filename));
         }
         ImageView site = dropSites.get(i+7);
         site.setFitHeight(cardHeight);
@@ -427,17 +423,13 @@ public class GameLayoutController implements Initializable {
         sourcePilePlaceholder.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
         sourcePilePlaceholder.setFitWidth(cardWidth);
         sourcePilePlaceholder.setFitHeight(cardHeight);
-        SourcePile pile = game.getSourcePile();
         for (int i = 0; i < sourcePileCards.size(); i++) {
             ImageView sourcePileCard = sourcePileCards.get(i);
-            String filename = pile.forcePeek(i).toString();
             sourcePileCard.toFront();
             sourcePileCard.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
             sourcePileCard.setLayoutX(xCoords[1]);
             sourcePileCard.setFitWidth(cardWidth);
             sourcePileCard.setFitHeight(cardHeight);
-            if (sourcePileCard.getImage() != CardImages.get().cardImages.get(filename))
-                sourcePileCard.setImage(CardImages.get().cardImages.get(filename));
         }
     }
 
