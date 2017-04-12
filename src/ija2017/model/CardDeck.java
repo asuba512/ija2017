@@ -21,6 +21,10 @@ public class CardDeck {
         return this.deck.peekLast();
     }
 
+    public Card forcePeek(int index){
+        return this.deck.get(index);
+    }
+
     public int size(){
         return this.deck.size();
     }

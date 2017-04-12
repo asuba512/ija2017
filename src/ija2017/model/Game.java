@@ -90,7 +90,7 @@ public class Game {
         }
         SourcePile sp = this.sourcePile;
         FaceDownPile fp = this.faceDownPile;
-        invoker.execute(new Commander.Command() {;
+        invoker.execute(new Commander.Command() {
             @Override
             public void execute() {
                 sp.put(fp.remove());
@@ -103,10 +103,10 @@ public class Game {
         });
     }
 
-    private void turnOverSource(){
+    public void turnOverSource(){
         SourcePile sp = this.sourcePile;
         FaceDownPile fp = this.faceDownPile;
-        invoker.execute(new Commander.Command() {;
+        invoker.execute(new Commander.Command() {
             @Override
             public void execute() {
                 while(!sp.isEmpty())
@@ -129,7 +129,6 @@ public class Game {
         SourcePile sp = this.sourcePile;
         FoundationPile tp = this.foundationPile[targetFoundation];
         invoker.execute(new Commander.Command() {
-
             @Override
             public void execute() {
                 tp.put(sp.remove());
@@ -146,7 +145,6 @@ public class Game {
         FoundationPile sp = this.foundationPile[foundation];
         FoundationPile tp = this.foundationPile[targetFoundation];
         invoker.execute(new Commander.Command() {
-
             @Override
             public void execute() {
                 tp.put(sp.remove());
@@ -231,5 +229,21 @@ public class Game {
                 ss.put(ts.remove(index));
             }
         });
+    }
+
+    public CardStack getCardStack(int i) {
+        return this.cardStack[i];
+    }
+
+    public FoundationPile getFoundationPile(int i){
+        return this.foundationPile[i];
+    }
+
+    public SourcePile getSourcePile(){
+        return this.sourcePile;
+    }
+
+    public int getFaceDownPileSize(){
+        return this.faceDownPile.size();
     }
 }
