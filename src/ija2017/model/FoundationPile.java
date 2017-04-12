@@ -3,7 +3,7 @@ package ija2017.model;
 /**
  * Created by xsubaa00 on 10/04/17.
  */
-public class TargetPile extends CardPile {
+public class FoundationPile extends CardDeck {
     @Override
     public boolean put(Card c){
         if (this.deck.isEmpty())

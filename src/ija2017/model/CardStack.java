@@ -18,7 +18,7 @@ public class CardStack extends CardDeck {
     public boolean put(Card c){
         if(!c.isTurnedFaceUp()) // inserting cards during game initialization
             return super.put(c);
-        else{ // inserting cards from SourcePile or from TargetPile
+        else{ // inserting cards from SourcePile or from FoundationPile
             if (this.deck.isEmpty())
                 return c.value() == 13 && super.put(c);
             if(this.deck.peekLast().value() - 1 == c.value() && !c.similarColorTo(this.deck.peekLast()))
