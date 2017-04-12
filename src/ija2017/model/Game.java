@@ -243,7 +243,7 @@ public class Game {
         return this.sourcePile;
     }
 
-    public int getFaceDownPileSize(){
-        return this.faceDownPile.size();
+    public FaceDownPile getFaceDownPile(){
+        return this.faceDownPile;
     }
 }

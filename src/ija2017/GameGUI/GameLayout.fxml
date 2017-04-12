@@ -12,7 +12,7 @@
         <items>
             <Button mnemonicParsing="false" text="Save game" />
             <Button mnemonicParsing="false" onAction="#cancelGameClick" text="Cancel game" />
-            <Button mnemonicParsing="false" onAction="#testClick" text="Undo" />
+            <Button mnemonicParsing="false" onAction="#undo" text="Undo" />
             <Button mnemonicParsing="false" text="Get hint" />
             <Label fx:id="idLabel" />
         </items>

@@ -4,7 +4,7 @@ public class Card {
     private Color color;
     private int value;
     private boolean isUp = false;
-    private static String valueToString[] = {"", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    public static String valueToString[] = {"", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
 
     public Card(Card.Color color, int value){
         this.value = value;
