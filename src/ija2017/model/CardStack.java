@@ -47,13 +47,8 @@ public class CardStack extends CardDeck {
 
     /* index must be checked before */
     public Card peek(int index){
-        if(this.deck.get(index).isTurnedFaceUp()){
-            for(int i = index + 1; i < this.deck.size(); i++ ){
-                if(this.deck.get(i - 1).value() != this.deck.get(i).value() + 1)
-                    return null; // may need to check color? but i don't think so
-            }
+        if(this.deck.get(index).isTurnedFaceUp())
             return this.deck.get(index);
-        }
         return null;
     }
 
