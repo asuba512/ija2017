@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.MainWindowController">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.MainWindowController">
    <top>
        <ToolBar style="-fx-background-color: #e8e8e8;" BorderPane.alignment="CENTER">
            <Button fx:id="newGameButton" mnemonicParsing="false" onAction="#newGameClick" text="New game" />

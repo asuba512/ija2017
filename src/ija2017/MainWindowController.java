@@ -1,7 +1,7 @@
-package ija2017.GUI;
+package ija2017;
 
-import ija2017.GUI.GameGUI.GameExitHandler;
-import ija2017.GUI.GameGUI.GameLayoutController;
+import ija2017.GameGUI.GameExitHandler;
+import ija2017.GameGUI.GameLayoutController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +12,6 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.FileChooser;
-import javafx.stage.Window;
 
 import java.io.File;
 import java.io.IOException;

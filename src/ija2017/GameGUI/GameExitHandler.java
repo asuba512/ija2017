@@ -1,4 +1,4 @@
-package ija2017.GUI.GameGUI;
+package ija2017.GameGUI;
 
 import javafx.scene.layout.BorderPane;
 

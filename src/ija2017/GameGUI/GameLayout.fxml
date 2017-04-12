@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane fx:id="gameRootPane" maxHeight="Infinity" maxWidth="Infinity" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.GameGUI.GameLayoutController">
+<BorderPane fx:id="gameRootPane" maxHeight="Infinity" maxWidth="Infinity" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.GameGUI.GameLayoutController">
    <top>
       <ToolBar style="-fx-background-color: f3f3f3;" BorderPane.alignment="CENTER">
         <items>

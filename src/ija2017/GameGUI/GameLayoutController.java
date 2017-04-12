@@ -1,16 +1,13 @@
-package ija2017.GUI.GameGUI;
+package ija2017.GameGUI;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 
-import javax.smartcardio.Card;
-import java.awt.geom.Point2D;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
