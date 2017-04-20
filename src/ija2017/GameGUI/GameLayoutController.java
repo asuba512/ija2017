@@ -72,7 +72,7 @@ public class GameLayoutController implements Initializable {
         sourceCardIndex = -1;
         if(sourcePileIndex < 7 && sourcePileIndex >= 0) // stack
             sourceCardIndex = senderStackCardIndex(sourcePileIndex, sender);
-        idLabel.setText(sourcePileIndex + ":" + sourceCardIndex);
+        //idLabel.setText(sourcePileIndex + ":" + sourceCardIndex);
         calculateDropSites();
         sender.toFront();
         if(sourceCardIndex >= 0)
@@ -103,6 +103,7 @@ public class GameLayoutController implements Initializable {
     }
 
     private void enddragdrop(MouseEvent mouseEvent) {
+        System.out.println("enddraggrop start");
         ImageView source = ((ImageView)mouseEvent.getSource());
         this.dragdrop = false;
         for(int i = 0; i < 11; i++) {
@@ -155,8 +156,9 @@ public class GameLayoutController implements Initializable {
             else
                 sourcePileCards.remove(source);
         }
-
+        System.out.println("enddraggrop stop");
         draw();
+        System.out.println("drawn.");
     }
 
     private int getOverlayIndex(Point pos) {
@@ -293,8 +295,6 @@ public class GameLayoutController implements Initializable {
             }
             cardStacks.add(cardStack);
         }
-        /*for(int i = 4; i < 7; i++)
-            cardStacks.add(new ArrayList<>(13));*/
         for(int i = 0; i < 11; i++) {
             ImageView site;
             site = new ImageView(CardImages.get().cardHoverOverlay);
@@ -314,13 +314,10 @@ public class GameLayoutController implements Initializable {
                 faceDownPile.add(c);
                 c.setVisible(false);
             }
-            faceDownPilePlaceholder.setImage(CardImages.get().cardImages.get("X(X)"));
         } else {
             c = faceDownPile.remove(0);
             sourcePileCards.add(c);
             c.setVisible(true);
-            if(faceDownPile.size() == 0)
-                faceDownPilePlaceholder.setImage(CardImages.get().cardPlaceholder);
         }
         draw();
     }
@@ -335,10 +332,16 @@ public class GameLayoutController implements Initializable {
 
     public void undo(ActionEvent actionEvent) {
         game.undo();
+       // DO IT JAKUB. JUST DO IT.
+        /*
+        * Here write your code.
+        * USE ONLY LISP/PROLOG.
+        */
         draw();
     }
 
     private void draw() {
+        System.out.println("start drawing:" + System.currentTimeMillis());
         int height = (int)playingTable.getHeight();
         int width = (int)playingTable.getWidth();
         maxSizeX = (width - SPACING) / 7 - SPACING;
@@ -365,11 +368,18 @@ public class GameLayoutController implements Initializable {
         sourcePilePlaceholder.setFitWidth(cardWidth);
         sourcePilePlaceholder.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
         sourcePilePlaceholder.setLayoutX(xCoords[1]);
+
+        if(faceDownPile.size() == 0)
+            faceDownPilePlaceholder.setImage(CardImages.get().cardPlaceholder);
+        else
+            faceDownPilePlaceholder.setImage(CardImages.get().cardImages.get("X(X)"));
+
         for(int i = 0; i < 7; i++)
             drawStack(i);
         for(int i = 0; i < 4; i++)
             drawTargetPile(i);
         drawSourcePile();
+        System.out.println("stop drawing:" + System.currentTimeMillis());
     }
 
     private void drawStack(int i) {
