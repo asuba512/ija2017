@@ -16,16 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-
 public class GameLayoutController implements Initializable {
+    // geometry =  used by proportions calculation methods
     private static final int SPACING = 10;
     private static final double RATIO = 351.0 / 226.0;
-    public BorderPane gameRootPane;
-    public Label idLabel;
-    public Pane playingTable;
+    private int maxSizeY, maxSizeX; // max size of one column/row without spacing
+    private int cardWidth, cardHeight; // calculated dimensions of one card with respect to game pane size
+    private int[] xCoords, yCoords; // calculated coordinates for card positioning
+    private int firstRowDecksY;
+    private int cardOffsetInStack;
     private File loadFile = null;
-    private Game game;
 
+    // ImageViews
     private ArrayList<ImageView> targetPlaceholders = new ArrayList<>(4);
     private ArrayList<ImageView> stackPlaceholders = new ArrayList<>(7);
     private ArrayList<ArrayList<ImageView>> cardStacks = new ArrayList<>(7);
@@ -34,14 +36,10 @@ public class GameLayoutController implements Initializable {
     private ImageView sourcePilePlaceholder;
     private ArrayList<ImageView> faceDownPile = new ArrayList<>(54);
     private ArrayList<ImageView> sourcePileCards = new ArrayList<>(54);
-    private int[] xCoords;
-    private int[] yCoords;
-    private int cardOffsetInStack;
-    private int maxSizeX;
-    private int maxSizeY;
-    int cardWidth;
-    int cardHeight;
 
+    public BorderPane gameRootPane;
+    public Pane playingTable;
+    private Game game;
 
     private List<GameExitHandler> gameExitHandlers = new ArrayList<>();
 
@@ -54,15 +52,21 @@ public class GameLayoutController implements Initializable {
             h.removeGame(gameRootPane);
     }
 
-    /********** Drag&drop logic *********/
+    public void cancelGameClick(ActionEvent actionEvent) {
+        OnGameExit(); // fire game exit event
+    }
+
+    public void setLoadFile(File f) {
+        loadFile = f;
+    }
 
     private boolean dragdrop = false;
     private double xPixelsInside;
     private double yPixelsInside;
     private ArrayList<ImageView> dropSites = new ArrayList<>(11);
     private ArrayList<Point> dropsiteCenters = new ArrayList<>(11);
-    int sourcePileIndex;
-    int sourceCardIndex;
+    private int sourcePileIndex;
+    private int sourceCardIndex;
 
     private void begindragdrop(MouseEvent mouseEvent) {
         ImageView sender = (ImageView)mouseEvent.getSource();
@@ -156,9 +160,7 @@ public class GameLayoutController implements Initializable {
             else
                 sourcePileCards.remove(source);
         }
-        System.out.println("enddraggrop stop");
-        draw();
-        System.out.println("drawn.");
+        reconstructTable();
     }
 
     private int getOverlayIndex(Point pos) {
@@ -243,58 +245,56 @@ public class GameLayoutController implements Initializable {
 
     /********** Drag&drop logic end *********/
 
+    private void turnOver(MouseEvent mouseEvent){
+        game.turnCard();
+        constructFaceDownPile();
+        SourcePile pile = game.getSourcePile();
+        if(pile.isEmpty()) {
+            constructSourcePile();
+        } else {
+            ImageView img = new ImageView(CardImages.get().cardImages.get(pile.forcePeek(pile.size()-1).toString()));
+            sourcePileCards.add(img);
+            playingTable.getChildren().add(img);
+            img.setOnMousePressed(this::begindragdrop);
+            img.setOnMouseDragged(this::dragdrop);
+            img.setOnMouseReleased(this::enddragdrop);
+        }
+        placeAll();
+    }
+
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        // set listeners on window resize
+    public void initialize(URL url, ResourceBundle rb) {
+        /* bind window resize listeners */
+        playingTable.heightProperty().addListener(e -> placeAll());
+        playingTable.widthProperty().addListener(e -> placeAll());
+
         game = new Game();
-        Card c;
-        CardStack stack;
-        FaceDownPile pile = game.getFaceDownPile();
-        playingTable.heightProperty().addListener(e -> draw());
-        playingTable.widthProperty().addListener(e -> draw());
+
         /* FaceDownPile */
         faceDownPilePlaceholder = new ImageView(CardImages.get().cardImages.get("X(X)"));
         faceDownPilePlaceholder.setOnMouseClicked(this::turnOver);
         playingTable.getChildren().add(faceDownPilePlaceholder);
-        for(int i = 23; i >= 0; i--){
-            c = pile.forcePeek(i);
-            ImageView card = new ImageView(CardImages.get().cardImages.get(Card.valueToString[c.value()] + "(" + c.color() + ")"));
-            card.setOnMousePressed(this::begindragdrop);
-            card.setOnMouseDragged(this::dragdrop);
-            card.setOnMouseReleased(this::enddragdrop);
-            faceDownPile.add(card);
-            card.setVisible(false);
-            playingTable.getChildren().add(card);
-        }
+
         /* SourcePile */
         sourcePilePlaceholder = new ImageView(CardImages.get().cardPlaceholder);
         playingTable.getChildren().add(sourcePilePlaceholder);
+
         /* Foundations */
         for(int i = 0; i < 4; i++){
             targetPlaceholders.add(new ImageView(CardImages.get().cardPlaceholder));
-            cardTargetPiles.add(new ArrayList<>(13));
             playingTable.getChildren().add(targetPlaceholders.get(i));
+            cardTargetPiles.add(new ArrayList<>(13)); // initialize card arraylist
         }
+
         /* Stacks */
         for(int i = 0; i < 7; i++) {
-            stackPlaceholders.add(new ImageView(CardImages.get().cardPlaceholder));
-            playingTable.getChildren().add(stackPlaceholders.get(i));
-            // getcardStack(index), getFoundationPile(index), getSourcePile(), getFaceDownPile()
-            stack = game.getCardStack(i);
-            ArrayList<ImageView> cardStack = new ArrayList<>(19);
-            for(int j = 0; j < i + 1; j++) {
-                c = stack.forcePeek(j); // forcePeek to override game rules
-                ImageView card = new ImageView(CardImages.get().cardImages.get(c.toString()));
-                cardStack.add(card);
-                if(c.toString() != "X(X)") {
-                    card.setOnMousePressed(this::begindragdrop);
-                    card.setOnMouseDragged(this::dragdrop);
-                    card.setOnMouseReleased(this::enddragdrop);
-                }
-                playingTable.getChildren().add(card);
-            }
-            cardStacks.add(cardStack);
+        	stackPlaceholders.add(new ImageView(CardImages.get().cardPlaceholder));
+        	playingTable.getChildren().add(stackPlaceholders.get(i));
+        	cardStacks.add(new ArrayList<>(19)); // initialize card arraylist
+        	constructStack(i);
         }
+
+        /* Drop site overlays */
         for(int i = 0; i < 11; i++) {
             ImageView site;
             site = new ImageView(CardImages.get().cardHoverOverlay);
@@ -302,123 +302,116 @@ public class GameLayoutController implements Initializable {
             site.setVisible(false);
             playingTable.getChildren().add(site);
         }
+
+        placeAll();
     }
 
-    private void turnOver(MouseEvent mouseEvent){
-        game.turnCard();
-        ImageView c;
-        if(faceDownPile.isEmpty()) {
-            int size = sourcePileCards.size();
-            for (int i = 0; i < size; i++) {
-                c = sourcePileCards.remove(0);
-                faceDownPile.add(c);
-                c.setVisible(false);
+    private void constructTargetPile(int i) {
+    	ArrayList<ImageView> targetPile = cardTargetPiles.get(i);
+        for(ImageView image : cardTargetPiles.get(i))
+            playingTable.getChildren().remove(image);
+    	targetPile.clear();
+    	FoundationPile pile = game.getFoundationPile(i);
+    	for(int j = 0; j < pile.size(); j++) {
+    		Card c = pile.forcePeek(j); // forcePeek to override game rules
+            ImageView card = new ImageView(CardImages.get().cardImages.get(c.toString()));
+        	targetPile.add(card);
+            card.setOnMousePressed(this::begindragdrop);
+            card.setOnMouseDragged(this::dragdrop);
+            card.setOnMouseReleased(this::enddragdrop);
+            playingTable.getChildren().add(card);
+    	}
+    }
+
+    private void constructStack(int i) {
+		ArrayList<ImageView> cardStack = cardStacks.get(i);
+        for(ImageView image : cardStacks.get(i))
+            playingTable.getChildren().remove(image);
+        cardStack.clear();
+        CardStack stack = game.getCardStack(i);
+        for(int j = 0; j < stack.size(); j++) {
+            Card c = stack.forcePeek(j); // forcePeek to override game rules
+            ImageView card = new ImageView(CardImages.get().cardImages.get(c.toString()));
+            cardStack.add(card);
+            if(!c.toString().equals("X(X)")) {
+                card.setOnMousePressed(this::begindragdrop);
+                card.setOnMouseDragged(this::dragdrop);
+                card.setOnMouseReleased(this::enddragdrop);
             }
-        } else {
-            c = faceDownPile.remove(0);
-            sourcePileCards.add(c);
-            c.setVisible(true);
+            playingTable.getChildren().add(card);
         }
-        draw();
     }
 
-    public void setLoadFile(File f) {
-        loadFile = f;
-    }
-
-    public void cancelGameClick(ActionEvent actionEvent) {
-        OnGameExit(); // fire game exit event
-    }
-
-    public void undo(ActionEvent actionEvent) {
-        game.undo();
-       // DO IT JAKUB. JUST DO IT.
-        /*
-        * Here write your code.
-        * USE ONLY LISP/PROLOG.
-        */
-        draw();
-    }
-
-    private void draw() {
-        System.out.println("start drawing:" + System.currentTimeMillis());
-        int height = (int)playingTable.getHeight();
-        int width = (int)playingTable.getWidth();
-        maxSizeX = (width - SPACING) / 7 - SPACING;
-        maxSizeY = (height - 3 * SPACING) / 3;
-        if(maxSizeX * RATIO > maxSizeY) {
-            cardHeight = maxSizeY;
-            cardWidth = (int)(maxSizeY / RATIO);
-        } else {
-            cardHeight = (int)(maxSizeX * RATIO);
-            cardWidth = maxSizeX;
-        }
-       // idLabel.setText(""+maxSizeX);
-        int localShift = (maxSizeX - cardWidth) / 2;
-        xCoords = getXcoords(width);
-        for(int i = 0; i < 7; i++) {
-            xCoords[i] += localShift;
-        }
-        yCoords = getYcoords(height, cardHeight);
-        faceDownPilePlaceholder.setFitHeight(cardHeight);
-        faceDownPilePlaceholder.setFitWidth(cardWidth);
-        faceDownPilePlaceholder.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
-        faceDownPilePlaceholder.setLayoutX(xCoords[0]);
-        sourcePilePlaceholder.setFitHeight(cardHeight);
-        sourcePilePlaceholder.setFitWidth(cardWidth);
-        sourcePilePlaceholder.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
-        sourcePilePlaceholder.setLayoutX(xCoords[1]);
-
-        if(faceDownPile.size() == 0)
+    private void constructFaceDownPile() {
+        FaceDownPile pile = game.getFaceDownPile();
+        if(pile.size() == 0)
             faceDownPilePlaceholder.setImage(CardImages.get().cardPlaceholder);
         else
             faceDownPilePlaceholder.setImage(CardImages.get().cardImages.get("X(X)"));
-
-        for(int i = 0; i < 7; i++)
-            drawStack(i);
-        for(int i = 0; i < 4; i++)
-            drawTargetPile(i);
-        drawSourcePile();
-        System.out.println("stop drawing:" + System.currentTimeMillis());
     }
 
-    private void drawStack(int i) {
+    private void constructSourcePile() {
+        for(ImageView image : sourcePileCards)
+            playingTable.getChildren().remove(image);
+        sourcePileCards.clear();
+        SourcePile pile = game.getSourcePile();
+        for(int i = 0; i < pile.size(); i++) {
+            Card c = pile.forcePeek(i);
+            ImageView img = new ImageView(CardImages.get().cardImages.get(c.toString()));
+            sourcePileCards.add(img);
+            playingTable.getChildren().add(img);
+            img.setOnMousePressed(this::begindragdrop);
+            img.setOnMouseDragged(this::dragdrop);
+            img.setOnMouseReleased(this::enddragdrop);
+        }
+    }
+
+    private void placeAll() {
+        calculateProportions();
+        for(int i = 0; i < 7; i++)
+            placeStack(i);
+        for(int i = 0; i < 4; i++)
+            placeTargetPile(i);
+        placeFaceDownPlaceholder();
+        placeSourcePile();
+    }
+
+    private void placeFaceDownPlaceholder() {
+        faceDownPilePlaceholder.setFitHeight(cardHeight);
+        faceDownPilePlaceholder.setFitWidth(cardWidth);
+        faceDownPilePlaceholder.setLayoutY(firstRowDecksY);
+        faceDownPilePlaceholder.setLayoutX(xCoords[0]);
+    }
+
+    private void placeStack(int i) {
         stackPlaceholders.get(i).setFitWidth(cardWidth);
         stackPlaceholders.get(i).setFitHeight(cardHeight);
         stackPlaceholders.get(i).setLayoutX(xCoords[i]);
         stackPlaceholders.get(i).setLayoutY(yCoords[0]);
-        CardStack stack = game.getCardStack(i);
         for(int j = 0; j < cardStacks.get(i).size(); j++) {
-            String filename = stack.forcePeek(j).toString();
             ImageView img = cardStacks.get(i).get(j);
             img.setLayoutX(xCoords[i]);
             img.setLayoutY(yCoords[j]);
             img.setFitHeight(cardHeight);
             img.setFitWidth(cardWidth);
             img.toFront();
-            if (img.getImage() != CardImages.get().cardImages.get(filename)) {
-                img.setOnMousePressed(this::begindragdrop);
-                img.setOnMouseDragged(this::dragdrop);
-                img.setOnMouseReleased(this::enddragdrop);
-                img.setImage(CardImages.get().cardImages.get(filename));
-            }
         }
         ImageView site = dropSites.get(i);
         site.setFitHeight(cardHeight);
         site.setFitWidth(cardWidth);
     }
 
-    private void drawTargetPile(int i) {
+    private void placeTargetPile(int i) {
         ImageView img = targetPlaceholders.get(i);
         img.setLayoutX(xCoords[i+3]);
-        img.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
+        img.setLayoutY(firstRowDecksY);
         img.setFitWidth(cardWidth);
         img.setFitHeight(cardHeight);
         for(int j = 0; j < cardTargetPiles.get(i).size(); j++) {
             ImageView card;
             card = cardTargetPiles.get(i).get(j);
             card.toFront();
-            card.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
+            card.setLayoutY(firstRowDecksY);
             card.setLayoutX(xCoords[i+3]);
             card.setFitWidth(cardWidth);
             card.setFitHeight(cardHeight);
@@ -428,19 +421,43 @@ public class GameLayoutController implements Initializable {
         site.setFitWidth(cardWidth);
     }
 
-    private void drawSourcePile() {
+    private void placeSourcePile() {
         sourcePilePlaceholder.setLayoutX(xCoords[1]);
-        sourcePilePlaceholder.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
+        sourcePilePlaceholder.setLayoutY(firstRowDecksY);
         sourcePilePlaceholder.setFitWidth(cardWidth);
         sourcePilePlaceholder.setFitHeight(cardHeight);
-        for (int i = 0; i < sourcePileCards.size(); i++) {
+        for(int i = 0; i < sourcePileCards.size(); i++) {
             ImageView sourcePileCard = sourcePileCards.get(i);
             sourcePileCard.toFront();
-            sourcePileCard.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
+            sourcePileCard.setLayoutY(firstRowDecksY);
             sourcePileCard.setLayoutX(xCoords[1]);
             sourcePileCard.setFitWidth(cardWidth);
             sourcePileCard.setFitHeight(cardHeight);
         }
+    }
+
+    /* Calculation of proportions for drawing. */
+
+    private void calculateProportions() {
+        int height = (int)playingTable.getHeight();
+        int width = (int)playingTable.getWidth();
+        maxSizeX = (width - SPACING) / 7 - SPACING;
+        maxSizeY = (height - 3 * SPACING) / 3;
+        // recalculate card dimensions with respect to smaller dimension
+        if(maxSizeX * RATIO > maxSizeY) {
+            cardHeight = maxSizeY;
+            cardWidth = (int)(maxSizeY / RATIO);
+        } else {
+            cardHeight = (int)(maxSizeX * RATIO);
+            cardWidth = maxSizeX;
+        }
+        int localShift = (maxSizeX - cardWidth) / 2;
+        xCoords = getXcoords(width);
+        for(int i = 0; i < 7; i++) {
+            xCoords[i] += localShift;
+        }
+        yCoords = getYcoords(height, cardHeight);
+        firstRowDecksY = SPACING + (maxSizeY - cardHeight) / 2;
     }
 
     private int[] getXcoords(int width) {
@@ -460,6 +477,23 @@ public class GameLayoutController implements Initializable {
         for(int i = 1; i < 19; i++)
             arr[i] = arr[0] + i * cardOffsetInStack;
         return arr;
+    }
+
+    public void undo(ActionEvent actionEvent) {
+        game.undo();
+        reconstructTable();
+    }
+
+    private void reconstructTable() {
+        for(int i = 0; i < 7; i++)
+            constructStack(i);
+
+        for(int i = 0; i < 4; i++)
+            constructTargetPile(i);
+
+        constructSourcePile();
+        constructFaceDownPile();
+        placeAll();
     }
 
     private class Point {

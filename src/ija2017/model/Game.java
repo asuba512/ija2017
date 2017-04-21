@@ -103,7 +103,7 @@ public class Game {
         });
     }
 
-    public void turnOverSource(){
+    public void turnOverSource() {
         SourcePile sp = this.sourcePile;
         FaceDownPile fp = this.faceDownPile;
         invoker.execute(new Commander.Command() {
