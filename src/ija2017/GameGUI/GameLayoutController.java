@@ -3,6 +3,7 @@ package ija2017.GameGUI;
 import ija2017.model.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -24,7 +25,6 @@ public class GameLayoutController implements Initializable {
     private int[] xCoords, yCoords; // calculated coordinates for card positioning
     private int firstRowDecksY;
     private int cardOffsetInStack;
-    private File loadFile = null;
 
     // ImageViews
     private ArrayList<ImageView> targetPlaceholders = new ArrayList<>(4);
@@ -53,10 +53,6 @@ public class GameLayoutController implements Initializable {
 
     public void cancelGameClick(ActionEvent actionEvent) {
         OnGameExit(); // fire game exit event
-    }
-
-    public void setLoadFile(File f) {
-        loadFile = f;
     }
 
     private double xPixelsInside;
@@ -262,8 +258,6 @@ public class GameLayoutController implements Initializable {
         playingTable.heightProperty().addListener(e -> placeAll());
         playingTable.widthProperty().addListener(e -> placeAll());
 
-        game = new Game();
-
         /* FaceDownPile */
         faceDownPilePlaceholder = new ImageView(CardImages.get().cardImages.get("X(X)"));
         faceDownPilePlaceholder.setOnMouseClicked(this::turnOver);
@@ -285,7 +279,6 @@ public class GameLayoutController implements Initializable {
         	stackPlaceholders.add(new ImageView(CardImages.get().cardPlaceholder));
         	playingTable.getChildren().add(stackPlaceholders.get(i));
         	cardStacks.add(new ArrayList<>(19)); // initialize card arraylist
-        	constructStack(i);
         }
 
         /* Drop site overlays */
@@ -296,8 +289,23 @@ public class GameLayoutController implements Initializable {
             site.setVisible(false);
             playingTable.getChildren().add(site);
         }
+    }
 
-        placeAll();
+    public void initializeNewGame() {
+        game = new Game();
+        reconstructTable();
+    }
+
+    public void initializeWithFile(File savegame) {
+        /* create new game with given file */
+        game = new Game();
+        reconstructTable();
+    }
+
+    public void initializeWithSeed(String seed) {
+        /* create new game with given seed*/
+        game = new Game();
+        reconstructTable();
     }
 
     private void constructTargetPile(int i) {
@@ -488,6 +496,14 @@ public class GameLayoutController implements Initializable {
         constructSourcePile();
         constructFaceDownPile();
         placeAll();
+    }
+
+    public void hintClick() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Hint");
+        alert.setHeaderText(null);
+        alert.setContentText("Hint text.");
+        alert.showAndWait();
     }
 
     private class Point {

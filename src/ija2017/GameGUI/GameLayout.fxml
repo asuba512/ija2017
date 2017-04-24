@@ -13,7 +13,7 @@
             <Button mnemonicParsing="false" text="Save game" />
             <Button mnemonicParsing="false" onAction="#cancelGameClick" text="Cancel game" />
             <Button mnemonicParsing="false" onAction="#undo" text="Undo" />
-            <Button mnemonicParsing="false" text="Get hint" />
+            <Button mnemonicParsing="false" onAction="#hintClick" text="Get hint" />
             <Label fx:id="idLabel" />
         </items>
       </ToolBar>

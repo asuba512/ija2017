@@ -6,22 +6,28 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainWindowController implements Initializable, GameExitHandler {
     public GridPane gameGrid;
     public Button newGameButton;
     public Button loadGameButton;
+    public Button seedGameButton;
 
     private int numberOfGames = 0;
     private BorderPane[][] gamePanes = {{null, null}, {null, null}}; // [row][col]
@@ -97,7 +103,9 @@ public class MainWindowController implements Initializable, GameExitHandler {
             newGame = loader.load();
             gameGrid.add(newGame, 0, 0);
             gamePanes[0][0] = (BorderPane)gameGrid.getChildren().get(0);
-            ((GameLayoutController)loader.getController()).addExitHandler(this);
+            GameLayoutController ctr = loader.getController();
+            ctr.addExitHandler(this);
+            ctr.initializeNewGame();
             numberOfGames++;
         } catch (IOException ignored) {}
     }
@@ -111,7 +119,8 @@ public class MainWindowController implements Initializable, GameExitHandler {
             BorderPane newGame = loader.load();
             gamePanes[freespot[0]][freespot[1]] = newGame;
             gameGrid.add(newGame, freespot[1], freespot[0]);
-            ((GameLayoutController)loader.getController()).addExitHandler(this);
+            GameLayoutController ctr = loader.getController();
+            ctr.addExitHandler(this);
             numberOfGames++;
             if(numberOfGames == 4) {
                 newGameButton.setDisable(true);
@@ -119,6 +128,7 @@ public class MainWindowController implements Initializable, GameExitHandler {
             }
             if(numberOfGames == 1)
                 setBiggerGame(freespot[0], freespot[1]);
+            ctr.initializeNewGame();
         }
     }
 
@@ -133,9 +143,10 @@ public class MainWindowController implements Initializable, GameExitHandler {
             return;
         FXMLLoader loader = new FXMLLoader(getClass().getResource("GameGUI/GameLayout.fxml"));
         BorderPane newGame = loader.load();
-        GameLayoutController controller = loader.getController();
-        controller.setLoadFile(selectedFile);
+        GameLayoutController ctr = loader.getController();
+        ctr.addExitHandler(this);
         gameGrid.add(newGame, 0, 0);
+        ctr.initializeWithFile(selectedFile);
     }
 
     /* Splits screen into 4 separate areas for games */
@@ -167,4 +178,34 @@ public class MainWindowController implements Initializable, GameExitHandler {
         gameGrid.getColumnConstraints().get(col).setPercentWidth(100.0);
     }
 
+    public void seedGameClick() {
+        int[] freespot = findFreeSpot();
+        if(freespot != null) {
+            TextInputDialog dialog = new TextInputDialog("42");
+            dialog.setTitle("Seed prompt");
+            dialog.setHeaderText("Please enter your seed");
+            dialog.setContentText("Random text:");
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(s -> {
+                setSmallerGame();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("GameGUI/GameLayout.fxml"));
+                BorderPane newGame;
+                try {
+                    newGame = loader.load();
+                } catch (IOException e) { return; }
+                gamePanes[freespot[0]][freespot[1]] = newGame;
+                gameGrid.add(newGame, freespot[1], freespot[0]);
+                GameLayoutController ctr = loader.getController();
+                ctr.addExitHandler(this);
+                numberOfGames++;
+                if(numberOfGames == 4) {
+                    newGameButton.setDisable(true);
+                    loadGameButton.setDisable(true);
+                }
+                if(numberOfGames == 1)
+                    setBiggerGame(freespot[0], freespot[1]);
+                ctr.initializeWithSeed(s);
+            });
+        }
+    }
 }

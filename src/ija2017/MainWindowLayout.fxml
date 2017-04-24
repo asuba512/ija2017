@@ -7,11 +7,12 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.MainWindowController">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.MainWindowController">
    <top>
        <ToolBar style="-fx-background-color: #e8e8e8;" BorderPane.alignment="CENTER">
-           <Button fx:id="newGameButton" mnemonicParsing="false" onAction="#newGameClick" text="New game" />
-           <Button fx:id="loadGameButton" mnemonicParsing="false" onAction="#loadGameClick" text="Load game" />
+            <Button fx:id="newGameButton" mnemonicParsing="false" onAction="#newGameClick" text="New game" />
+            <Button fx:id="loadGameButton" mnemonicParsing="false" onAction="#loadGameClick" text="Load game" />
+            <Button fx:id="seedGameButton" mnemonicParsing="false" onAction="#seedGameClick" text="New game from seed" />
        </ToolBar>
    </top>
    <center>
