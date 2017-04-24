@@ -13,13 +13,19 @@ public class Game {
 
     private final Commander.Invoker invoker = new Commander.Invoker();
 
+    public Game(long seed){
+        LinkedList<Card> deck = CardDeck.createDeck();
+        Collections.shuffle(deck, new Random(seed)); // shuffle created deck
+        initGame(deck);
+    }
+
     public Game(){
+        this(System.nanoTime());
+    }
+
+    private void initGame(LinkedList<Card> deck){
         this.sourcePile = new SourcePile();
         this.faceDownPile = new FaceDownPile();
-        LinkedList<Card> deck = CardDeck.createDeck();
-        long seed = System.nanoTime();
-        Collections.shuffle(deck, new Random((long) 1995)); // shuffle created deck
-        //Collections.shuffle(deck, new Random(seed)); // shuffle created deck
         for(int i = 0; i < 4; i++)
             this.foundationPile[i] = new FoundationPile();
         for(int i = 0; i < 7; i++) {

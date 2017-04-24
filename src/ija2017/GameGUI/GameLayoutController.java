@@ -3,8 +3,7 @@ package ija2017.GameGUI;
 import ija2017.model.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.image.Image;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -60,7 +59,6 @@ public class GameLayoutController implements Initializable {
         loadFile = f;
     }
 
-    private boolean dragdrop = false;
     private double xPixelsInside;
     private double yPixelsInside;
     private ArrayList<ImageView> dropSites = new ArrayList<>(11);
@@ -68,7 +66,7 @@ public class GameLayoutController implements Initializable {
     private int sourcePileIndex;
     private int sourceCardIndex;
 
-    private void begindragdrop(MouseEvent mouseEvent) {
+    private void beginDragDrop(MouseEvent mouseEvent) {
         ImageView sender = (ImageView)mouseEvent.getSource();
         xPixelsInside = mouseEvent.getSceneX() - sender.getLayoutX();
         yPixelsInside = mouseEvent.getSceneY() - sender.getLayoutY();
@@ -76,7 +74,6 @@ public class GameLayoutController implements Initializable {
         sourceCardIndex = -1;
         if(sourcePileIndex < 7 && sourcePileIndex >= 0) // stack
             sourceCardIndex = senderStackCardIndex(sourcePileIndex, sender);
-        //idLabel.setText(sourcePileIndex + ":" + sourceCardIndex);
         calculateDropSites();
         sender.toFront();
         if(sourceCardIndex >= 0)
@@ -84,10 +81,9 @@ public class GameLayoutController implements Initializable {
                 cardStacks.get(sourcePileIndex).get(i).toFront();
         if(sourcePileIndex >= 0)
             dropsiteCenters.set(sourcePileIndex, null); // prevent highlighting of source pile
-        this.dragdrop = true;
     }
 
-    private void dragdrop(MouseEvent mouseEvent) {
+    private void dragDrop(MouseEvent mouseEvent) {
         ImageView source = ((ImageView)mouseEvent.getSource());
         if(sourceCardIndex >= 0)
             for(int i = sourceCardIndex + 1;  i < cardStacks.get(sourcePileIndex).size(); i++) {
@@ -106,10 +102,8 @@ public class GameLayoutController implements Initializable {
         }
     }
 
-    private void enddragdrop(MouseEvent mouseEvent) {
-        System.out.println("enddraggrop start");
+    private void endDragDrop(MouseEvent mouseEvent) {
         ImageView source = ((ImageView)mouseEvent.getSource());
-        this.dragdrop = false;
         for(int i = 0; i < 11; i++) {
             dropSites.get(i).setVisible(false);
         }
@@ -255,9 +249,9 @@ public class GameLayoutController implements Initializable {
             ImageView img = new ImageView(CardImages.get().cardImages.get(pile.forcePeek(pile.size()-1).toString()));
             sourcePileCards.add(img);
             playingTable.getChildren().add(img);
-            img.setOnMousePressed(this::begindragdrop);
-            img.setOnMouseDragged(this::dragdrop);
-            img.setOnMouseReleased(this::enddragdrop);
+            img.setOnMousePressed(this::beginDragDrop);
+            img.setOnMouseDragged(this::dragDrop);
+            img.setOnMouseReleased(this::endDragDrop);
         }
         placeAll();
     }
@@ -316,9 +310,9 @@ public class GameLayoutController implements Initializable {
     		Card c = pile.forcePeek(j); // forcePeek to override game rules
             ImageView card = new ImageView(CardImages.get().cardImages.get(c.toString()));
         	targetPile.add(card);
-            card.setOnMousePressed(this::begindragdrop);
-            card.setOnMouseDragged(this::dragdrop);
-            card.setOnMouseReleased(this::enddragdrop);
+            card.setOnMousePressed(this::beginDragDrop);
+            card.setOnMouseDragged(this::dragDrop);
+            card.setOnMouseReleased(this::endDragDrop);
             playingTable.getChildren().add(card);
     	}
     }
@@ -334,9 +328,9 @@ public class GameLayoutController implements Initializable {
             ImageView card = new ImageView(CardImages.get().cardImages.get(c.toString()));
             cardStack.add(card);
             if(!c.toString().equals("X(X)")) {
-                card.setOnMousePressed(this::begindragdrop);
-                card.setOnMouseDragged(this::dragdrop);
-                card.setOnMouseReleased(this::enddragdrop);
+                card.setOnMousePressed(this::beginDragDrop);
+                card.setOnMouseDragged(this::dragDrop);
+                card.setOnMouseReleased(this::endDragDrop);
             }
             playingTable.getChildren().add(card);
         }
@@ -360,9 +354,9 @@ public class GameLayoutController implements Initializable {
             ImageView img = new ImageView(CardImages.get().cardImages.get(c.toString()));
             sourcePileCards.add(img);
             playingTable.getChildren().add(img);
-            img.setOnMousePressed(this::begindragdrop);
-            img.setOnMouseDragged(this::dragdrop);
-            img.setOnMouseReleased(this::enddragdrop);
+            img.setOnMousePressed(this::beginDragDrop);
+            img.setOnMouseDragged(this::dragDrop);
+            img.setOnMouseReleased(this::endDragDrop);
         }
     }
 
