@@ -18,7 +18,8 @@ public class Game {
         this.faceDownPile = new FaceDownPile();
         LinkedList<Card> deck = CardDeck.createDeck();
         long seed = System.nanoTime();
-        Collections.shuffle(deck, new Random(seed)); // shuffle created deck
+        Collections.shuffle(deck, new Random((long) 1995)); // shuffle created deck
+        //Collections.shuffle(deck, new Random(seed)); // shuffle created deck
         for(int i = 0; i < 4; i++)
             this.foundationPile[i] = new FoundationPile();
         for(int i = 0; i < 7; i++) {
@@ -216,6 +217,7 @@ public class Game {
         CardStack ss = this.cardStack[stack];
         invoker.execute(new Commander.Command() {
             boolean flipped;
+            int indexOfOriginalTargetPack = ts.size(); // index for undo
             @Override
             public void execute() {
                 ts.put(ss.remove(index));
@@ -226,7 +228,7 @@ public class Game {
             public void undo() {
                 if(flipped)
                     ss.turnFaceDownTopCard();
-                ss.put(ts.remove(index));
+                ss.put(ts.remove(indexOfOriginalTargetPack));
             }
         });
     }
