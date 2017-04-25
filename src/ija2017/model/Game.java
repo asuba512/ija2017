@@ -1,11 +1,10 @@
 package ija2017.model;
 
+import java.io.*;
 import java.util.*;
 
-/**
- * Created by xsubaa00 on 10/04/17.
- */
-public class Game {
+
+public class Game implements Serializable {
     private CardStack[] cardStack = new CardStack[7];
     private FoundationPile[] foundationPile = new FoundationPile[4];
     private SourcePile sourcePile;
@@ -83,6 +82,62 @@ public class Game {
         if(this.cardStack[stack].isEmpty() || this.cardStack[stack].size() <= index)
             return false;
         return this.cardStack[targetStack].canAccept(this.cardStack[stack].peek(index));
+    }
+
+    public List<String> getHints() {
+        LinkedList<String> hints = new LinkedList<>();
+        // source -> foundation
+        for(int i = 0; i < 4; i++) {
+            if(canMoveToFoundation(i)) {
+                hints.add("Move card from source deck to foundation.");
+                break; // avoid multiple foundation hint
+            }
+        }
+
+        // source -> stack
+        for(int i = 0; i < 7; i++) {
+            if(canMoveToStack(i)) {
+                hints.add("Move card from source deck to stack number " + (i+1) + ".");
+            }
+        }
+
+        // stack -> foundation (switched inner and outer cycles to avoid hint duplication to multiple foundations)
+        for(int s = 0; s < 7; s++) {
+            for(int f = 0; f < 4; f++) {
+                if (canMoveToFoundation(f, s, this.cardStack[s].size() - 1)) {
+                    hints.add("Move card from stack number " + (s + 1) + " to foundation.");
+                }
+            }
+        }
+
+        // stack -> stack
+        for(int target = 0; target < 7; target++) {
+            for(int source = 0; source < 7; source++) {
+                if(source == target)
+                    continue;
+                for(int card = this.cardStack[source].getFirstTurnedFaceUpIndex(); card < this.cardStack[source].size(); card++) {
+                    if(canMoveToStack(target, source, card))
+                        hints.add("Move " + this.cardStack[source].forcePeek(card).toString()
+                                + " from stack number " + (source+1) + " to stack number " + (target+1) + ".");
+                }
+            }
+        }
+
+        // new card
+        if(!this.faceDownPile.isEmpty())
+            hints.add("Try drawing new card from deck.");
+        else if(!this.sourcePile.isEmpty())
+            hints.add("Try turning the source pile.");
+
+        // foundation -> stack
+        for(int s = 0; s < 7; s++) {
+            for(int f = 0; f < 4; f++) {
+                if(canMoveToStack(s, f)) {
+                    hints.add("Try to move card from foundation to stack number " + (s+1) + ".");
+                }
+            }
+        }
+        return hints;
     }
 
     /* COMMANDS */

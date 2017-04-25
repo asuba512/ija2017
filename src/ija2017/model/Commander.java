@@ -1,18 +1,16 @@
 package ija2017.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by xsubaa00 on 10/04/17.
- */
-public class Commander {
-    public static interface Command {
+public class Commander implements Serializable {
+    public interface Command extends Serializable {
         void execute();
         void undo();
     }
 
-    public static class Invoker {
+    public static class Invoker implements Serializable {
         List<Command> commands = new ArrayList<>();
         public void execute(Command cmd){
             commands.add(0, cmd);

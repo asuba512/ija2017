@@ -4,13 +4,13 @@ import ija2017.model.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.FileChooser;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,10 @@ public class GameLayoutController implements Initializable {
     public BorderPane gameRootPane;
     public Pane playingTable;
     private Game game;
+
+    // hints
+    private List<String> hints;
+    private int hintIndex = -1; // repeated asking for hints rotates available hints
 
     private List<GameExitHandler> gameExitHandlers = new ArrayList<>();
 
@@ -149,6 +153,7 @@ public class GameLayoutController implements Initializable {
             }
             else
                 sourcePileCards.remove(source);
+            hintIndex = -1; // reset hints
         }
         reconstructTable();
     }
@@ -249,6 +254,7 @@ public class GameLayoutController implements Initializable {
             img.setOnMouseDragged(this::dragDrop);
             img.setOnMouseReleased(this::endDragDrop);
         }
+        hintIndex = -1; // reset hints
         placeAll();
     }
 
@@ -296,9 +302,9 @@ public class GameLayoutController implements Initializable {
         reconstructTable();
     }
 
-    public void initializeWithFile(File savegame) {
+    public void initializeWithGame(Game savedGame) {
         /* create new game with given file */
-        game = new Game();
+        game = savedGame;
         reconstructTable();
     }
 
@@ -483,6 +489,7 @@ public class GameLayoutController implements Initializable {
 
     public void undo(ActionEvent actionEvent) {
         game.undo();
+        hintIndex = -1;
         reconstructTable();
     }
 
@@ -499,11 +506,40 @@ public class GameLayoutController implements Initializable {
     }
 
     public void hintClick() {
+        if(hintIndex < 0) { // if we haven't asked for hints in this turn yet
+            hints = game.getHints();
+        }
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Hint");
         alert.setHeaderText(null);
-        alert.setContentText("Hint text.");
+
+        if(hints.size() != 0) {
+            hintIndex = ++hintIndex % hints.size();
+            alert.setContentText(hints.get(hintIndex));
+        } else {
+            hintIndex = 0;
+            alert.setContentText("This game is lost. There's no hope.");
+        }
         alert.showAndWait();
+    }
+
+    public void saveClick() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Game");
+        File file = fileChooser.showSaveDialog(gameRootPane.getScene().getWindow());
+        if (file != null) {
+            try {
+                file.createNewFile();
+                FileOutputStream fileOut = new FileOutputStream(file, false); // false = do not append
+                ObjectOutputStream oos = new ObjectOutputStream(fileOut);
+                oos.writeObject(game);
+                oos.close();
+                fileOut.close();
+            } catch(IOException e) {
+                return;
+            }
+        }
     }
 
     private class Point {

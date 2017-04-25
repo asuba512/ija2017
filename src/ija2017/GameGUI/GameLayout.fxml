@@ -10,7 +10,7 @@
    <top>
       <ToolBar style="-fx-background-color: f3f3f3;" BorderPane.alignment="CENTER">
         <items>
-            <Button mnemonicParsing="false" text="Save game" />
+            <Button mnemonicParsing="false" onAction="#saveClick" text="Save game" />
             <Button mnemonicParsing="false" onAction="#cancelGameClick" text="Cancel game" />
             <Button mnemonicParsing="false" onAction="#undo" text="Undo" />
             <Button mnemonicParsing="false" onAction="#hintClick" text="Get hint" />

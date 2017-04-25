@@ -2,23 +2,21 @@ package ija2017;
 
 import ija2017.GameGUI.GameExitHandler;
 import ija2017.GameGUI.GameLayoutController;
+import ija2017.model.Game;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
-import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.*;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -133,20 +131,41 @@ public class MainWindowController implements Initializable, GameExitHandler {
     }
 
     @FXML
-    public void loadGameClick(ActionEvent e) throws IOException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open saved game");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Solitaire JSON savegame", "*.sjson"));
-        File selectedFile = fileChooser.showOpenDialog(gameGrid.getScene().getWindow());
-        if(selectedFile == null)
-            return;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("GameGUI/GameLayout.fxml"));
-        BorderPane newGame = loader.load();
-        GameLayoutController ctr = loader.getController();
-        ctr.addExitHandler(this);
-        gameGrid.add(newGame, 0, 0);
-        ctr.initializeWithFile(selectedFile);
+    public void loadGameClick() throws IOException {
+        int[] freeSpot = findFreeSpot();
+        if(freeSpot != null) {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open saved game");
+            File selectedFile = fileChooser.showOpenDialog(gameGrid.getScene().getWindow());
+            if (selectedFile == null)
+                return;
+            Game g;
+            try {
+                FileInputStream fileIn = new FileInputStream(selectedFile);
+                ObjectInputStream in = new ObjectInputStream(fileIn);
+                g = (Game) in.readObject();
+                in.close();
+                fileIn.close();
+            } catch (Exception e) {
+                showErrorDialog("File loading error", "Error loading savegame file. Is file in correct format and accessible?");
+                return;
+            }
+            setSmallerGame();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("GameGUI/GameLayout.fxml"));
+            BorderPane newGame = loader.load();
+            GameLayoutController ctr = loader.getController();
+            ctr.addExitHandler(this);
+            gamePanes[freeSpot[0]][freeSpot[1]] = newGame;
+            gameGrid.add(newGame, freeSpot[1], freeSpot[0]);
+            numberOfGames++;
+            if(numberOfGames == 4) {
+                newGameButton.setDisable(true);
+                loadGameButton.setDisable(true);
+            }
+            if(numberOfGames == 1)
+                setBiggerGame(freeSpot[0], freeSpot[1]);
+            ctr.initializeWithGame(g);
+        }
     }
 
     /* Splits screen into 4 separate areas for games */
@@ -207,5 +226,13 @@ public class MainWindowController implements Initializable, GameExitHandler {
                 ctr.initializeWithSeed(s);
             });
         }
+    }
+
+    private void showErrorDialog(String header, String text) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(header);
+        alert.setHeaderText(null);
+        alert.setContentText(text);
+        alert.showAndWait();
     }
 }

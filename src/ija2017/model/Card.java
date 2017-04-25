@@ -1,6 +1,8 @@
 package ija2017.model;
 
-public class Card {
+import java.io.Serializable;
+
+public class Card implements Serializable {
     private Color color;
     private int value;
     private boolean isUp = false;
@@ -77,7 +79,7 @@ public class Card {
         return result;
     }
 
-    enum Color{
+    enum Color implements Serializable {
         CLUBS("C"), DIAMONDS("D"), HEARTS("H"), SPADES("S");
 
         private String value;
