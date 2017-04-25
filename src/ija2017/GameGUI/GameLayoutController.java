@@ -5,7 +5,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
@@ -13,8 +14,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 
-import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ public class GameLayoutController implements Initializable {
     private ArrayList<ImageView> faceDownPile = new ArrayList<>(54);
     private ArrayList<ImageView> sourcePileCards = new ArrayList<>(54);
 
+    public BorderPane gameContainer;
     public BorderPane gameRootPane;
     public Pane playingTable;
     public Label redeals;
@@ -60,7 +60,7 @@ public class GameLayoutController implements Initializable {
 
     private void OnGameExit() {
         for(GameExitHandler h : gameExitHandlers)
-            h.removeGame(gameRootPane);
+            h.removeGame(gameContainer);
     }
 
     public void cancelGameClick(ActionEvent actionEvent) {
@@ -164,6 +164,24 @@ public class GameLayoutController implements Initializable {
             hintIndex = -1; // reset hints
         }
         reconstructTable();
+        if(cardTargetPiles.get(0).size() == 13 && cardTargetPiles.get(1).size() == 13 &&
+                cardTargetPiles.get(2).size() == 13 && cardTargetPiles.get(3).size() == 13)
+            gameWon();
+    }
+
+    private void gameWon() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Done!");
+        alert.setHeaderText(null);
+        alert.setContentText("Congratulations!\nYou have won the game!");
+        alert.getDialogPane().getStyleClass().add("congratulations");
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("GameLayout.css").toExternalForm());
+        ImageView firework = new ImageView(ImageResources.get().firework);
+        firework.setFitWidth(200);
+        firework.setFitHeight(200);
+        alert.setGraphic(firework);
+        alert.showAndWait();
+        OnGameExit();
     }
 
     private int getOverlayIndex(Point pos) {
@@ -255,7 +273,7 @@ public class GameLayoutController implements Initializable {
         if(pile.isEmpty()) {
             constructSourcePile();
         } else {
-            ImageView img = new ImageView(CardImages.get().cardImages.get(pile.forcePeek(pile.size()-1).toString()));
+            ImageView img = new ImageView(ImageResources.get().cardImages.get(pile.forcePeek(pile.size()-1).toString()));
             sourcePileCards.add(img);
             playingTable.getChildren().add(img);
             img.setOnMousePressed(this::beginDragDrop);
@@ -273,24 +291,24 @@ public class GameLayoutController implements Initializable {
         playingTable.widthProperty().addListener(e -> placeAll());
 
         /* FaceDownPile */
-        faceDownPilePlaceholder = new ImageView(CardImages.get().cardImages.get("X(X)"));
+        faceDownPilePlaceholder = new ImageView(ImageResources.get().cardImages.get("X(X)"));
         faceDownPilePlaceholder.setOnMouseClicked(this::turnOver);
         playingTable.getChildren().add(faceDownPilePlaceholder);
 
         /* SourcePile */
-        sourcePilePlaceholder = new ImageView(CardImages.get().cardPlaceholder);
+        sourcePilePlaceholder = new ImageView(ImageResources.get().cardPlaceholder);
         playingTable.getChildren().add(sourcePilePlaceholder);
 
         /* Foundations */
         for(int i = 0; i < 4; i++){
-            targetPlaceholders.add(new ImageView(CardImages.get().cardPlaceholder));
+            targetPlaceholders.add(new ImageView(ImageResources.get().cardPlaceholder));
             playingTable.getChildren().add(targetPlaceholders.get(i));
             cardTargetPiles.add(new ArrayList<>(13)); // initialize card arraylist
         }
 
         /* Stacks */
         for(int i = 0; i < 7; i++) {
-        	stackPlaceholders.add(new ImageView(CardImages.get().cardPlaceholder));
+        	stackPlaceholders.add(new ImageView(ImageResources.get().cardPlaceholder));
         	playingTable.getChildren().add(stackPlaceholders.get(i));
         	cardStacks.add(new ArrayList<>(19)); // initialize card arraylist
         }
@@ -298,7 +316,7 @@ public class GameLayoutController implements Initializable {
         /* Drop site overlays */
         for(int i = 0; i < 11; i++) {
             ImageView site;
-            site = new ImageView(CardImages.get().cardHoverOverlay);
+            site = new ImageView(ImageResources.get().cardHoverOverlay);
             dropSites.add(site);
             site.setVisible(false);
             playingTable.getChildren().add(site);
@@ -333,7 +351,7 @@ public class GameLayoutController implements Initializable {
     	FoundationPile pile = game.getFoundationPile(i);
     	for(int j = 0; j < pile.size(); j++) {
     		Card c = pile.forcePeek(j); // forcePeek to override game rules
-            ImageView card = new ImageView(CardImages.get().cardImages.get(c.toString()));
+            ImageView card = new ImageView(ImageResources.get().cardImages.get(c.toString()));
         	targetPile.add(card);
             card.setOnMousePressed(this::beginDragDrop);
             card.setOnMouseDragged(this::dragDrop);
@@ -350,7 +368,7 @@ public class GameLayoutController implements Initializable {
         CardStack stack = game.getCardStack(i);
         for(int j = 0; j < stack.size(); j++) {
             Card c = stack.forcePeek(j); // forcePeek to override game rules
-            ImageView card = new ImageView(CardImages.get().cardImages.get(c.toString()));
+            ImageView card = new ImageView(ImageResources.get().cardImages.get(c.toString()));
             cardStack.add(card);
             if(!c.toString().equals("X(X)")) {
                 card.setOnMousePressed(this::beginDragDrop);
@@ -364,9 +382,9 @@ public class GameLayoutController implements Initializable {
     private void constructFaceDownPile() {
         FaceDownPile pile = game.getFaceDownPile();
         if(pile.size() == 0)
-            faceDownPilePlaceholder.setImage(CardImages.get().cardPlaceholder);
+            faceDownPilePlaceholder.setImage(ImageResources.get().cardPlaceholder);
         else
-            faceDownPilePlaceholder.setImage(CardImages.get().cardImages.get("X(X)"));
+            faceDownPilePlaceholder.setImage(ImageResources.get().cardImages.get("X(X)"));
     }
 
     private void constructSourcePile() {
@@ -376,7 +394,7 @@ public class GameLayoutController implements Initializable {
         SourcePile pile = game.getSourcePile();
         for(int i = 0; i < pile.size(); i++) {
             Card c = pile.forcePeek(i);
-            ImageView img = new ImageView(CardImages.get().cardImages.get(c.toString()));
+            ImageView img = new ImageView(ImageResources.get().cardImages.get(c.toString()));
             sourcePileCards.add(img);
             playingTable.getChildren().add(img);
             img.setOnMousePressed(this::beginDragDrop);
@@ -486,7 +504,7 @@ public class GameLayoutController implements Initializable {
         int slice_size = (width - SPACING) / 7;
         int[] arr = new int[7];
         for (int i = 0; i < 7; i++)
-            arr[i] = SPACING + i * slice_size;
+            arr[i] =  SPACING + i * slice_size;
         return arr;
     }
 

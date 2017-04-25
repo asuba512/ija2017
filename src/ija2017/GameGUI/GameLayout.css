@@ -1,13 +1,4 @@
-Button{
-    -fx-background-color: #81E681;
-}
-Button:hover, Button:focused{
-    -fx-background-color: #9CE69C;
-}
-
-#copySeed{
-    -fx-background-color: transparent;
-    -fx-cursor: hand;
+#gameContainer{
 }
 
 #playingTable{
@@ -18,19 +9,43 @@ Button:hover, Button:focused{
     -fx-background-color: #55cc55;
 }
 
-#toolbar Label{
-    -fx-font-family: "DejaVu Sans";
-    -fx-text-fill: black;
-    -fx-font-weight: bolder;
-    -fx-font-size: 1.2em;
-}
+    #toolbar Button{
+        -fx-translate-x: 5px;
+        -fx-translate-y: 5px;
+        -fx-background-color: #81E681;
+        -fx-border-color: #81E681;
+    }
+    #toolbar Button:hover{
+        -fx-background-color: #9CE69C;
+        -fx-border-color: #9CE69C;
+    }
+
+    #toolbar Button:focused{
+        -fx-border-color: #2A832A;
+    }
+
+    #toolbar Button ImageView{
+        -fx-translate-x: 0;
+        -fx-translate-y: 0;
+    }
 
 #toolbarBottom{
     -fx-background-color: #55cc55;
 }
 
-#toolbarBottom Label{
-    -fx-font-family: "DejaVu Sans";
-    -fx-text-fill: black;
-    -fx-font-size: 0.95em;
+    #copySeedButton{
+        -fx-background-color: transparent;
+        -fx-border-width: 0px;
+        -fx-cursor: hand;
+    }
+
+    #toolbarBottom Label{
+        -fx-text-fill: black;
+        -fx-font-size: 0.95em;
+    }
+
+
+.congratulations > *.label.content{
+    -fx-font-size: 1.4em;
+    -fx-font-weight: bold;
 }

@@ -10,70 +10,77 @@
 <?import javafx.scene.layout.Pane?>
 
 <?import javafx.scene.control.Tooltip?>
-<BorderPane fx:id="gameRootPane" maxHeight="Infinity" maxWidth="Infinity" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.GameGUI.GameLayoutController">
+<BorderPane fx:id="gameContainer" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.GameGUI.GameLayoutController">
     <stylesheets>
         <URL value="@GameLayout.css" />
     </stylesheets>
-   <top>
-       <ToolBar id="toolbar" BorderPane.alignment="CENTER">
-           <Button mnemonicParsing="false" onAction="#saveClick">
-               <graphic>
-                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                       <Image url="@img/save.png"/>
-                   </ImageView>
-               </graphic>
-               <tooltip>
-                   <Tooltip text="Save game"/>
-               </tooltip>
-           </Button>
-           <Button mnemonicParsing="false" onAction="#cancelGameClick">
-               <graphic>
-                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                       <Image url="@img/cancel.png"/>
-                   </ImageView>
-               </graphic>
-               <tooltip>
-                   <Tooltip text="Cancel game"/>
-               </tooltip>
-           </Button>
-           <Button mnemonicParsing="false" onAction="#undo">
-               <graphic>
-                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                       <Image url="@img/undo.png"/>
-                   </ImageView>
-               </graphic>
-               <tooltip>
-                   <Tooltip text="Undo last move"/>
-               </tooltip>
-           </Button>
-           <Button mnemonicParsing="false" onAction="#hintClick">
-               <graphic>
-                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                       <Image url="@img/help.png"/>
-                   </ImageView>
-               </graphic>
-               <tooltip>
-                   <Tooltip text="Get hint"/>
-               </tooltip>
-           </Button>
-           <Label fx:id="redeals" translateX="10"/>
-           <Label fx:id="points" translateX="20"/>
-       </ToolBar>
-   </top>
-   <center>
-      <Pane fx:id="playingTable" maxHeight="Infinity" maxWidth="Infinity" BorderPane.alignment="CENTER" />
-   </center>
+    <center>
+        <BorderPane  fx:id="gameRootPane"  maxHeight="Infinity" maxWidth="Infinity">
+            <left>
+                <ToolBar id="toolbar" BorderPane.alignment="CENTER" orientation="VERTICAL">
+                    <Button mnemonicParsing="false" onAction="#saveClick">
+                        <graphic>
+                            <ImageView fitWidth="24.0" fitHeight="24.0" pickOnBounds="true" preserveRatio="true">
+                                <Image url="@img/save.png"/>
+                            </ImageView>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip text="Save game"/>
+                        </tooltip>
+                    </Button>
+                    <Button mnemonicParsing="false" onAction="#cancelGameClick">
+                        <graphic>
+                            <ImageView fitWidth="24.0" fitHeight="24.0" pickOnBounds="true" preserveRatio="true">
+                                <Image url="@img/cancel.png"/>
+                            </ImageView>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip text="Cancel game"/>
+                        </tooltip>
+                    </Button>
+                    <Button mnemonicParsing="false" onAction="#undo">
+                        <graphic>
+                            <ImageView fitWidth="24.0" fitHeight="24.0" pickOnBounds="true" preserveRatio="true">
+                                <Image url="@img/undo.png"/>
+                            </ImageView>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip text="Undo last move"/>
+                        </tooltip>
+                    </Button>
+                    <Button mnemonicParsing="false" onAction="#hintClick">
+                        <graphic>
+                            <ImageView fitWidth="24.0" fitHeight="24.0" pickOnBounds="true" preserveRatio="true">
+                                <Image url="@img/help.png"/>
+                            </ImageView>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip text="Get hint"/>
+                        </tooltip>
+                    </Button>
+                </ToolBar>
+            </left>
+            <center>
+                <Pane fx:id="playingTable" maxHeight="Infinity" maxWidth="Infinity" BorderPane.alignment="TOP_LEFT" />
+            </center>
+        </BorderPane>
+    </center>
+
     <bottom>
         <ToolBar id="toolbarBottom">
+            <Label fx:id="points"/>
+            <Label text="|"/>
+            <Label fx:id="redeals"/>
+            <Label text="|"/>
             <Label fx:id="seed"/>
-            <Button mnemonicParsing="false" onAction="#copySeed" id="copySeed">
+            <Button mnemonicParsing="false" onAction="#copySeed" id="copySeedButton" translateX="-10">
                 <graphic>
                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                         <Image url="@img/copy.png"/>
                     </ImageView>
                 </graphic>
                 <tooltip>
-                    <Tooltip text="Get hint"/>
+                    <Tooltip text="Copy seed to clipboard"/>
                 </tooltip>
             </Button>
         </ToolBar>
