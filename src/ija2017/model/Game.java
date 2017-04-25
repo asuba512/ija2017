@@ -67,7 +67,6 @@ public class Game implements Serializable {
         return this.foundationPile[targetFoundation].canAccept(this.cardStack[stack].peek());
     }
 
-
     public boolean canMoveToStack(int targetStack){
         if(this.sourcePile.isEmpty())
             return false;

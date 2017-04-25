@@ -310,7 +310,7 @@ public class GameLayoutController implements Initializable {
 
     public void initializeWithSeed(String seed) {
         /* create new game with given seed*/
-        game = new Game();
+        game = new Game(seed.hashCode());
         reconstructTable();
     }
 

@@ -47,7 +47,6 @@ public class MainWindowController implements Initializable, GameExitHandler {
             return new int[] {1,1};
         else
             return null;
-
     }
 
     private void shiftGamePanesFrom(int[] spot) {
@@ -88,8 +87,7 @@ public class MainWindowController implements Initializable, GameExitHandler {
             setBiggerGame(0, 0);
         }
         if(numberOfGames < 4) {
-            newGameButton.setDisable(false);
-            loadGameButton.setDisable(false);
+            buttonsSetDisable(false);
         }
     }
 
@@ -121,8 +119,7 @@ public class MainWindowController implements Initializable, GameExitHandler {
             ctr.addExitHandler(this);
             numberOfGames++;
             if(numberOfGames == 4) {
-                newGameButton.setDisable(true);
-                loadGameButton.setDisable(true);
+                buttonsSetDisable(true);
             }
             if(numberOfGames == 1)
                 setBiggerGame(freespot[0], freespot[1]);
@@ -159,8 +156,7 @@ public class MainWindowController implements Initializable, GameExitHandler {
             gameGrid.add(newGame, freeSpot[1], freeSpot[0]);
             numberOfGames++;
             if(numberOfGames == 4) {
-                newGameButton.setDisable(true);
-                loadGameButton.setDisable(true);
+                buttonsSetDisable(true);
             }
             if(numberOfGames == 1)
                 setBiggerGame(freeSpot[0], freeSpot[1]);
@@ -218,8 +214,7 @@ public class MainWindowController implements Initializable, GameExitHandler {
                 ctr.addExitHandler(this);
                 numberOfGames++;
                 if(numberOfGames == 4) {
-                    newGameButton.setDisable(true);
-                    loadGameButton.setDisable(true);
+                    buttonsSetDisable(true);
                 }
                 if(numberOfGames == 1)
                     setBiggerGame(freespot[0], freespot[1]);
@@ -234,5 +229,11 @@ public class MainWindowController implements Initializable, GameExitHandler {
         alert.setHeaderText(null);
         alert.setContentText(text);
         alert.showAndWait();
+    }
+
+    private void buttonsSetDisable(boolean b) {
+        newGameButton.setDisable(b);
+        loadGameButton.setDisable(b);
+        seedGameButton.setDisable(b);
     }
 }
