@@ -124,7 +124,7 @@ public class Game implements Serializable {
                 if(card == 0 && this.cardStack[target].size() == 0)
                     continue; // eliminate moving kings between empty stacks
                 if(canMoveToStack(target, source, card))
-                    hints.add("Move " + this.cardStack[source].forcePeek(card).toString()
+                    hints.add("Move " + this.cardStack[source].forcePeek(card).toHumanReadableString()
                             + " from stack number " + (source+1) + " to stack number " + (target+1) + ".");
             }
         }
@@ -139,7 +139,7 @@ public class Game implements Serializable {
         for(int s = 0; s < 7; s++) {
             for(int f = 0; f < 4; f++) {
                 if(canMoveToStack(s, f)) {
-                    hints.add("Try to move card from foundation to stack number " + (s+1) + ".");
+                    hints.add("Try to move " + this.foundationPile[f].peek().toHumanReadableString() + " from foundation to stack number " + (s+1) + ".");
                 }
             }
         }

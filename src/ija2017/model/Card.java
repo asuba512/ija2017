@@ -6,7 +6,8 @@ public class Card implements Serializable {
     private Color color;
     private int value;
     private boolean isUp = false;
-    public static String valueToString[] = {"", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    public static final String valueToString[] = {"", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    public static final String valueToHumanReadableString[] = {"", "Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
 
     public Card(Card.Color color, int value){
         this.value = value;
@@ -62,6 +63,12 @@ public class Card implements Serializable {
         return valueToString[this.value] + "(" + color.toString() + ")";
     }
 
+    public String toHumanReadableString() {
+        if(!this.isUp)
+            return "X(X)";
+        return valueToHumanReadableString[this.value] + " of " + color.toHumanReadableString();
+    }
+
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
@@ -90,6 +97,16 @@ public class Card implements Serializable {
 
         public String toString(){
             return this.value;
+        }
+
+        public String toHumanReadableString() {
+            switch(this.value) {
+                case "C": return "clubs";
+                case "H": return "hearts";
+                case "S": return "spades";
+                case "D": return "diamonds";
+            }
+            return null;
         }
     }
 }
