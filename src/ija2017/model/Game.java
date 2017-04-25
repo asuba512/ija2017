@@ -121,6 +121,8 @@ public class Game implements Serializable {
                 int card;
                 if((card = this.cardStack[source].getFirstTurnedFaceUpIndex()) == -1)
                     continue;
+                if(card == 0 && this.cardStack[target].size() == 0)
+                    continue; // eliminate moving kings between empty stacks
                 if(canMoveToStack(target, source, card))
                     hints.add("Move " + this.cardStack[source].forcePeek(card).toString()
                             + " from stack number " + (source+1) + " to stack number " + (target+1) + ".");
