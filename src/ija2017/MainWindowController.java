@@ -196,10 +196,10 @@ public class MainWindowController implements Initializable, GameExitHandler {
     public void seedGameClick() {
         int[] freespot = findFreeSpot();
         if(freespot != null) {
-            TextInputDialog dialog = new TextInputDialog("42");
+            TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Seed prompt");
-            dialog.setHeaderText("Please enter your seed");
-            dialog.setContentText("Random text:");
+            dialog.setHeaderText("Please enter your seed.");
+            dialog.setContentText("Enter Seed:");
             Optional<String> result = dialog.showAndWait();
             result.ifPresent(s -> {
                 setSmallerGame();

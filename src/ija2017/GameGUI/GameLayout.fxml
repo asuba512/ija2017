@@ -1,24 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane fx:id="gameRootPane" maxHeight="Infinity" maxWidth="Infinity" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.GameGUI.GameLayoutController">
+<?import javafx.scene.control.Tooltip?>
+<BorderPane fx:id="gameRootPane" maxHeight="Infinity" maxWidth="Infinity" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.GameGUI.GameLayoutController">
+    <stylesheets>
+        <URL value="@GameLayout.css" />
+    </stylesheets>
    <top>
-      <ToolBar style="-fx-background-color: f3f3f3;" BorderPane.alignment="CENTER">
-        <items>
-            <Button mnemonicParsing="false" onAction="#saveClick" text="Save game" />
-            <Button mnemonicParsing="false" onAction="#cancelGameClick" text="Cancel game" />
-            <Button mnemonicParsing="false" onAction="#undo" text="Undo" />
-            <Button mnemonicParsing="false" onAction="#hintClick" text="Get hint" />
-            <Label fx:id="idLabel" />
-        </items>
-      </ToolBar>
+       <ToolBar id="toolbar" BorderPane.alignment="CENTER">
+           <Button mnemonicParsing="false" onAction="#saveClick">
+               <graphic>
+                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                       <Image url="@img/save.png"/>
+                   </ImageView>
+               </graphic>
+               <tooltip>
+                   <Tooltip text="Save game"/>
+               </tooltip>
+           </Button>
+           <Button mnemonicParsing="false" onAction="#cancelGameClick">
+               <graphic>
+                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                       <Image url="@img/cancel.png"/>
+                   </ImageView>
+               </graphic>
+               <tooltip>
+                   <Tooltip text="Cancel game"/>
+               </tooltip>
+           </Button>
+           <Button mnemonicParsing="false" onAction="#undo">
+               <graphic>
+                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                       <Image url="@img/undo.png"/>
+                   </ImageView>
+               </graphic>
+               <tooltip>
+                   <Tooltip text="Undo last move"/>
+               </tooltip>
+           </Button>
+           <Button mnemonicParsing="false" onAction="#hintClick">
+               <graphic>
+                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                       <Image url="@img/help.png"/>
+                   </ImageView>
+               </graphic>
+               <tooltip>
+                   <Tooltip text="Get hint"/>
+               </tooltip>
+           </Button>
+           <Label fx:id="redeals" translateX="10"/>
+           <Label fx:id="points" translateX="20"/>
+       </ToolBar>
    </top>
    <center>
-      <Pane fx:id="playingTable" maxHeight="Infinity" maxWidth="Infinity" style="-fx-background-color: #55cc55;" BorderPane.alignment="CENTER" />
+      <Pane fx:id="playingTable" maxHeight="Infinity" maxWidth="Infinity" BorderPane.alignment="CENTER" />
    </center>
+    <bottom>
+        <ToolBar id="toolbarBottom">
+            <Label fx:id="seed"/>
+            <Button mnemonicParsing="false" onAction="#copySeed" id="copySeed">
+                <graphic>
+                    <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@img/copy.png"/>
+                    </ImageView>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="Get hint"/>
+                </tooltip>
+            </Button>
+        </ToolBar>
+    </bottom>
 </BorderPane>

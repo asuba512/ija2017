@@ -1,0 +1,19 @@
+#toolbarMain{
+    -fx-background-color: #55cc55;
+    -fx-border-color: #1C851C;
+    -fx-border-width: 2px;
+    -fx-border-style: hidden hidden solid hidden;
+}
+
+#gameGrid{
+    -fx-background-color: #66dd66;
+}
+
+Button{
+    -fx-font-family: "DejaVu Sans";
+    -fx-text-fill: black;
+    -fx-background-color: #81E681;
+}
+Button:hover, Button:focused{
+    -fx-background-color: #9CE69C;
+}

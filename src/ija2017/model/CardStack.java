@@ -63,11 +63,13 @@ public class CardStack extends CardDeck {
     }
 
     public int getFirstTurnedFaceUpIndex() {
+        if(this.isEmpty())
+            return -1;
         int size = this.size();
         for(int i = 0; i < size; i++) {
             if(this.deck.get(i).isTurnedFaceUp())
                 return i;
         }
-        return size; // card with this index is certainly not in the stack nor has any followers
+        return -1; // card with this index is certainly not in the stack nor has any followers
     }
 }

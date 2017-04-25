@@ -1,0 +1,36 @@
+Button{
+    -fx-background-color: #81E681;
+}
+Button:hover, Button:focused{
+    -fx-background-color: #9CE69C;
+}
+
+#copySeed{
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+#playingTable{
+    -fx-background-color: #55cc55;
+}
+
+#toolbar{
+    -fx-background-color: #55cc55;
+}
+
+#toolbar Label{
+    -fx-font-family: "DejaVu Sans";
+    -fx-text-fill: black;
+    -fx-font-weight: bolder;
+    -fx-font-size: 1.2em;
+}
+
+#toolbarBottom{
+    -fx-background-color: #55cc55;
+}
+
+#toolbarBottom Label{
+    -fx-font-family: "DejaVu Sans";
+    -fx-text-fill: black;
+    -fx-font-size: 0.95em;
+}

@@ -7,16 +7,33 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
+<?import java.net.URL?>
+<?import javafx.scene.control.Tooltip?>
 <BorderPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ija2017.MainWindowController">
+    <stylesheets>
+        <URL value="@MainWindowLayout.css"/>
+    </stylesheets>
    <top>
-       <ToolBar style="-fx-background-color: #e8e8e8;" BorderPane.alignment="CENTER">
-            <Button fx:id="newGameButton" mnemonicParsing="false" onAction="#newGameClick" text="New game" />
-            <Button fx:id="loadGameButton" mnemonicParsing="false" onAction="#loadGameClick" text="Load game" />
-            <Button fx:id="seedGameButton" mnemonicParsing="false" onAction="#seedGameClick" text="New game from seed" />
+       <ToolBar id="toolbarMain" BorderPane.alignment="CENTER">
+            <Button fx:id="newGameButton" mnemonicParsing="false" onAction="#newGameClick" text="Quick Game">
+                <tooltip>
+                    <Tooltip text="Create new random game"/>
+                </tooltip>
+            </Button>
+           <Button fx:id="seedGameButton" mnemonicParsing="false" onAction="#seedGameClick" text="New Game" >
+            <tooltip>
+                   <Tooltip text="Create new game from seed"/>
+               </tooltip>
+           </Button>
+            <Button fx:id="loadGameButton" mnemonicParsing="false" onAction="#loadGameClick" text="Load game" >
+                <tooltip>
+                    <Tooltip text="Load saved game"/>
+                </tooltip>
+            </Button>
        </ToolBar>
    </top>
    <center>
-       <GridPane fx:id="gameGrid" style="-fx-background-color: brown;" BorderPane.alignment="CENTER">
+       <GridPane fx:id="gameGrid" BorderPane.alignment="CENTER">
            <columnConstraints>
                <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
                <ColumnConstraints hgrow="SOMETIMES" percentWidth="0.0" />

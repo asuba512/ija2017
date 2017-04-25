@@ -4,12 +4,17 @@ import ija2017.model.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
@@ -38,6 +43,9 @@ public class GameLayoutController implements Initializable {
 
     public BorderPane gameRootPane;
     public Pane playingTable;
+    public Label redeals;
+    public Label points;
+    public Label seed;
     private Game game;
 
     // hints
@@ -310,7 +318,10 @@ public class GameLayoutController implements Initializable {
 
     public void initializeWithSeed(String seed) {
         /* create new game with given seed*/
-        game = new Game(seed.hashCode());
+        if(seed.isEmpty())
+            game = new Game();
+        else
+            game = new Game(seed);
         reconstructTable();
     }
 
@@ -376,6 +387,9 @@ public class GameLayoutController implements Initializable {
 
     private void placeAll() {
         calculateProportions();
+        redeals.setText("Redeals left: " + game.getRedealsLeft());
+        points.setText("Points: " + game.getPoints());
+        seed.setText("Current seed: " + game.getSeed());
         for(int i = 0; i < 7; i++)
             placeStack(i);
         for(int i = 0; i < 4; i++)
@@ -540,6 +554,13 @@ public class GameLayoutController implements Initializable {
                 return;
             }
         }
+    }
+
+    public void copySeed(ActionEvent actionEvent) {
+        Clipboard cb = Clipboard.getSystemClipboard();
+        ClipboardContent c = new ClipboardContent();
+        c.putString(game.getSeed());
+        cb.setContent(c);
     }
 
     private class Point {

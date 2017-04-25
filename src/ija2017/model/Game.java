@@ -9,17 +9,21 @@ public class Game implements Serializable {
     private FoundationPile[] foundationPile = new FoundationPile[4];
     private SourcePile sourcePile;
     private FaceDownPile faceDownPile;
+    private String seed;
+    private long points;
+    private int redealsLeft = 2;
 
     private final Commander.Invoker invoker = new Commander.Invoker();
 
-    public Game(long seed){
+    public Game(String seed){
+        this.seed = seed;
         LinkedList<Card> deck = CardDeck.createDeck();
-        Collections.shuffle(deck, new Random(seed)); // shuffle created deck
+        Collections.shuffle(deck, new Random((long)seed.hashCode())); // shuffle created deck
         initGame(deck);
     }
 
     public Game(){
-        this(System.nanoTime());
+        this(Long.toString(System.nanoTime()));
     }
 
     private void initGame(LinkedList<Card> deck){
@@ -114,18 +118,19 @@ public class Game implements Serializable {
             for(int source = 0; source < 7; source++) {
                 if(source == target)
                     continue;
-                for(int card = this.cardStack[source].getFirstTurnedFaceUpIndex(); card < this.cardStack[source].size(); card++) {
-                    if(canMoveToStack(target, source, card))
-                        hints.add("Move " + this.cardStack[source].forcePeek(card).toString()
-                                + " from stack number " + (source+1) + " to stack number " + (target+1) + ".");
-                }
+                int card;
+                if((card = this.cardStack[source].getFirstTurnedFaceUpIndex()) == -1)
+                    continue;
+                if(canMoveToStack(target, source, card))
+                    hints.add("Move " + this.cardStack[source].forcePeek(card).toString()
+                            + " from stack number " + (source+1) + " to stack number " + (target+1) + ".");
             }
         }
 
         // new card
         if(!this.faceDownPile.isEmpty())
             hints.add("Try drawing new card from deck.");
-        else if(!this.sourcePile.isEmpty())
+        else if(!this.sourcePile.isEmpty() && this.redealsLeft > 0)
             hints.add("Try turning the source pile.");
 
         // foundation -> stack
@@ -146,7 +151,10 @@ public class Game implements Serializable {
 
     public void turnCard(){
         if(this.faceDownPile.isEmpty()) {
-            turnOverSource();
+            if(this.redealsLeft > 0) {
+                turnOverSource();
+                redealsLeft--;
+            }
             return;
         }
         SourcePile sp = this.sourcePile;
@@ -167,17 +175,21 @@ public class Game implements Serializable {
     public void turnOverSource() {
         SourcePile sp = this.sourcePile;
         FaceDownPile fp = this.faceDownPile;
+        Game g = this;
         invoker.execute(new Commander.Command() {
+            long points;
             @Override
             public void execute() {
                 while(!sp.isEmpty())
                     fp.put(sp.remove());
+                points = g.scorePoints(-100);
             }
 
             @Override
             public void undo() {
                 while(!fp.isEmpty())
                     sp.put(fp.remove());
+                g.scorePoints(points);
             }
         });
     }
@@ -189,15 +201,18 @@ public class Game implements Serializable {
     public void moveToFoundation(int targetFoundation){
         SourcePile sp = this.sourcePile;
         FoundationPile tp = this.foundationPile[targetFoundation];
+        Game g = this;
         invoker.execute(new Commander.Command() {
             @Override
             public void execute() {
                 tp.put(sp.remove());
+                g.scorePoints(10);
             }
 
             @Override
             public void undo() {
                 sp.put(tp.remove());
+                g.scorePoints(-10);
             }
         });
     }
@@ -222,18 +237,26 @@ public class Game implements Serializable {
     public void moveToFoundation(int targetFoundation, int stack, int index){
         CardStack cs = this.cardStack[stack];
         FoundationPile tp = this.foundationPile[targetFoundation];
+        Game g = this;
         invoker.execute(new Commander.Command() {
             boolean flipped;
             @Override
             public void execute() {
                 tp.put(cs.remove());
                 flipped = cs.turnFaceUpTopCard(); // true/false if was flipped or not
+                if(flipped)
+                    g.scorePoints(15); // 10 for stack->foundation, 5 for turning over card
+                else
+                    g.scorePoints(10); // only 10 for stack->foundation
             }
 
             @Override
             public void undo() {
-                if(flipped)
+                if(flipped) {
                     cs.turnFaceDownTopCard();
+                    g.scorePoints(-15);
+                }
+                else g.scorePoints(-10);
                 cs.forcePut(tp.remove());
             }
         });
@@ -242,15 +265,18 @@ public class Game implements Serializable {
     public void moveToStack(int targetStack){
         SourcePile sp = this.sourcePile;
         CardStack cs = this.cardStack[targetStack];
+        Game g = this;
         invoker.execute(new Commander.Command() {
             @Override
             public void execute() {
                 cs.put(sp.remove());
+                g.scorePoints(5);
             }
 
             @Override
             public void undo() {
                 sp.put(cs.remove());
+                g.scorePoints(-5);
             }
         });
     }
@@ -258,16 +284,19 @@ public class Game implements Serializable {
     public void moveToStack(int targetStack, int foundation){
         CardStack cs = this.cardStack[targetStack];
         FoundationPile tp = this.foundationPile[foundation];
+        Game g = this;
         invoker.execute(new Commander.Command() {
-
+            long points;
             @Override
             public void execute() {
                 cs.put(tp.remove());
+                points = g.scorePoints(-15);
             }
 
             @Override
             public void undo() {
                 tp.put(cs.remove());
+                g.scorePoints(points);
             }
         });
     }
@@ -275,6 +304,7 @@ public class Game implements Serializable {
     public void moveToStack(int targetStack, int stack, int index){
         CardStack ts = this.cardStack[targetStack];
         CardStack ss = this.cardStack[stack];
+        Game g = this;
         invoker.execute(new Commander.Command() {
             boolean flipped;
             int indexOfOriginalTargetPack = ts.size(); // index for undo
@@ -282,16 +312,39 @@ public class Game implements Serializable {
             public void execute() {
                 ts.put(ss.remove(index));
                 flipped = ss.turnFaceUpTopCard();
+                if(flipped)
+                    g.scorePoints(5);
             }
 
             @Override
             public void undo() {
-                if(flipped)
+                if(flipped) {
                     ss.turnFaceDownTopCard();
+                    g.scorePoints(-5);
+                }
                 ss.put(ts.remove(indexOfOriginalTargetPack));
             }
         });
     }
+
+    /* returns actual number of recorded points */
+    private long scorePoints(long pt){
+        this.points += pt;
+        if(this.points < 0) {
+            long tmp = this.points - pt;
+            this.points = 0;
+            return tmp;
+        }
+        return this.points;
+    }
+
+    public String getSeed() {return this.seed; }
+
+    public long getPoints(){
+        return this.points;
+    };
+
+    public int getRedealsLeft() {return this.redealsLeft; }
 
     public CardStack getCardStack(int i) {
         return this.cardStack[i];
