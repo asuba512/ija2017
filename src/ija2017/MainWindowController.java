@@ -21,15 +21,30 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+/**
+ * Controller of main scene (wrapper of games)
+ *
+ * @author Jakub Paliesek (xpalie00)
+ */
 public class MainWindowController implements Initializable, GameExitHandler {
+    /** grid holding games */
     public GridPane gameGrid;
+    /** button that creates new games from random seed */
     public Button newGameButton;
+    /** button that opens up file dialog and initializes new game from file */
     public Button loadGameButton;
+    /** button that pops up a dialog for entering seed and creates new game afterwards */
     public Button seedGameButton;
 
+    /** number of currently active games */
     private int numberOfGames = 0;
+    /** matrix of game panes */
     private BorderPane[][] gamePanes = {{null, null}, {null, null}}; // [row][col]
 
+    /**
+     * Finds first free spot for new game, starting at top right corner.
+     * @return x coordinate in game grid at index 0, y coordinate at index 1
+     */
     private int[] findFreeSpot() {
         for(int row = 0; row < 2; row++)
             for(int col = 0; col < 2; col++)
@@ -38,6 +53,11 @@ public class MainWindowController implements Initializable, GameExitHandler {
         return null;
     }
 
+    /**
+     * Determines coordinates of next spot to the spot from given coords
+     * @param spot coordinates of spot to find next one
+     * @return coordinates of spot next to given spot
+     */
     private int[] getNextSpot(int[] spot) {
         if(spot[0] == 0 && spot[1] == 0)
             return new int[] {0,1};
@@ -49,6 +69,11 @@ public class MainWindowController implements Initializable, GameExitHandler {
             return null;
     }
 
+    /**
+     * Every shift every game from its spot to previous spot. Shifting is performed only in
+     * internal matrix, not in GUI.
+     * @param spot coordinates of spot from which shifting begins
+     */
     private void shiftGamePanesFrom(int[] spot) {
         int[] nextSpot = getNextSpot(spot);
         if(nextSpot != null) {
@@ -58,6 +83,9 @@ public class MainWindowController implements Initializable, GameExitHandler {
         }
     }
 
+    /**
+     * Removes game panes from grid and inserts them again following their positions in internal matrix.
+     */
     private void recreateScreen() {
         for(int row = 0; row < 2; row++)
             for(int col = 0; col < 2; col++)
@@ -69,7 +97,10 @@ public class MainWindowController implements Initializable, GameExitHandler {
                     gameGrid.add(gamePanes[row][col], col, row);
     }
 
-    /* Handles exit of game */
+    /**
+     * Handles closing event from one of children (games).
+     * @param gamePane pane of game to be removed
+     */
     public void removeGame(BorderPane gamePane) {
         gameGrid.getChildren().remove(gamePane);
         int[] pos = new int[2];
@@ -91,6 +122,11 @@ public class MainWindowController implements Initializable, GameExitHandler {
         }
     }
 
+    /**
+     * Method performed when game grid is created. Creates new game that spans on all 4 spots (maximized game)
+     * @param url unused
+     * @param resourceBundle unused
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("GameGUI/GameLayout.fxml"));
@@ -106,6 +142,12 @@ public class MainWindowController implements Initializable, GameExitHandler {
         } catch (IOException ignored) {}
     }
 
+    /**
+     * Handles click event on button to create a quick game. Loads GameLayout using FXML loader,
+     * initializes game from random seed and disables game creation buttons when grid is full.
+     * @param e unused
+     * @throws IOException this can occur when FXML layout is missing
+     */
     @FXML
     public void newGameClick(ActionEvent e) throws IOException {
         int[] freespot = findFreeSpot();
@@ -127,6 +169,11 @@ public class MainWindowController implements Initializable, GameExitHandler {
         }
     }
 
+    /**
+     * Handles click event on load game button, prompts user to select savegame,
+     * loads gamelayout from FXML, creates new Game model object  and initializes new Game UI with it.
+     * @throws IOException Can occur when FXML layout is missing.
+     */
     @FXML
     public void loadGameClick() throws IOException {
         int[] freeSpot = findFreeSpot();
@@ -164,7 +211,9 @@ public class MainWindowController implements Initializable, GameExitHandler {
         }
     }
 
-    /* Splits screen into 4 separate areas for games */
+    /**
+     * Splits screen into 4 separate areas for games.
+     */
     private void setSmallerGame() {
         for (RowConstraints r : gameGrid.getRowConstraints())
             r.setPercentHeight(50.0);
@@ -174,7 +223,9 @@ public class MainWindowController implements Initializable, GameExitHandler {
         gameGrid.setHgap(3.0);
     }
 
-    /* Maximizes game at given [row, col] */
+    /**
+     * Maximizes game at given [row, col]
+     */
     private void setBiggerGame(int row, int col) {
         gameGrid.setVgap(0.0);
         gameGrid.setHgap(0.0);
@@ -193,6 +244,11 @@ public class MainWindowController implements Initializable, GameExitHandler {
         gameGrid.getColumnConstraints().get(col).setPercentWidth(100.0);
     }
 
+
+    /**
+     * Handles click event for new game button (from given seed). Prompts user to enter custom seed,
+     * loads FXML game layout and initializes game UI.
+     */
     public void seedGameClick() {
         int[] freespot = findFreeSpot();
         if(freespot != null) {
@@ -223,6 +279,11 @@ public class MainWindowController implements Initializable, GameExitHandler {
         }
     }
 
+    /**
+     * Pops up a generic error dialog
+     * @param header Text of hader.
+     * @param text Text of dialog contents.
+     */
     private void showErrorDialog(String header, String text) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(header);
@@ -231,6 +292,10 @@ public class MainWindowController implements Initializable, GameExitHandler {
         alert.showAndWait();
     }
 
+    /**
+     * Enable/disable game creation buttons (quick, new from seed, load)
+     * @param b use true to disable game, false for enabling
+     */
     private void buttonsSetDisable(boolean b) {
         newGameButton.setDisable(b);
         loadGameButton.setDisable(b);

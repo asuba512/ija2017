@@ -20,6 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller of single game scene.
+ *
+ * @author Jakub Paliesek (xpalie00)
+ */
 public class GameLayoutController implements Initializable {
     // geometry =  used by proportions calculation methods
     private static final int SPACING = 10;
@@ -31,49 +36,83 @@ public class GameLayoutController implements Initializable {
     private int cardOffsetInStack;
 
     // ImageViews
+    /** arraylist holding placeholders for foundations */
     private ArrayList<ImageView> targetPlaceholders = new ArrayList<>(4);
+    /** arraylist of placeholders for car stacks */
     private ArrayList<ImageView> stackPlaceholders = new ArrayList<>(7);
+    /** arraylist of arraylist (array of cardstacks containing cards */
     private ArrayList<ArrayList<ImageView>> cardStacks = new ArrayList<>(7);
+    /** arraylist of arraylist (array of foundations containing cards */
     private ArrayList<ArrayList<ImageView>> cardTargetPiles = new ArrayList<>(4);
+    /** placeholder for facedown pile */
     private ImageView faceDownPilePlaceholder;
+    /** placeholder for source pile (where dealt cards go) */
     private ImageView sourcePilePlaceholder;
-    private ArrayList<ImageView> faceDownPile = new ArrayList<>(54);
+
+    /** cards dealt from facedown pile */
     private ArrayList<ImageView> sourcePileCards = new ArrayList<>(54);
 
     public BorderPane gameContainer;
     public BorderPane gameRootPane;
     public Pane playingTable;
+    /** shows number of remaining redeals */
     public Label redeals;
+    /** shows number of earned points */
     public Label points;
+    /** shows current seed */
     public Label seed;
+    /** game model */
     private Game game;
 
-    // hints
+    /** list of hints (newly acquired after hint click after each move) */
     private List<String> hints;
+    /** used to cycle through list of acquired hints */
     private int hintIndex = -1; // repeated asking for hints rotates available hints
 
+    /** list of substribers to our custom observer game exit event */
     private List<GameExitHandler> gameExitHandlers = new ArrayList<>();
 
+    /**
+     * Adds new subscriber of custom game exit event that is fired when Cancel game button is clicked
+     */
     public void addExitHandler(GameExitHandler handler) {
         gameExitHandlers.add(handler);
     }
 
+    /**
+     * Fires OnGameExit Event to subscribers. By this event we are letting the enclosing scene know that
+     * this game scene needs to be destroyed.
+     */
     private void OnGameExit() {
         for(GameExitHandler h : gameExitHandlers)
             h.removeGame(gameContainer);
     }
 
-    public void cancelGameClick(ActionEvent actionEvent) {
+    /**
+     * Handles click event on cancel game click. Fires OnGameExit event to subscribers (in our case, the enclosing scene controller.
+     */
+    public void cancelGameClick() {
         OnGameExit(); // fire game exit event
     }
 
+
+    /** numbers of pixels on x axis of cursor inside card when dragged */
     private double xPixelsInside;
+    /** numbers of pixels on y axis of cursor inside card when dragged */
     private double yPixelsInside;
+    /** array of hightlight imageviews. shown on demand when card is dragged */
     private ArrayList<ImageView> dropSites = new ArrayList<>(11);
+    /** array of calculated centers of possible dragging targets. used to determine, which one is 'closest' */
     private ArrayList<Point> dropsiteCenters = new ArrayList<>(11);
+    /** index of pile from which is the dragged card */
     private int sourcePileIndex;
+    /** index of card in pile of dragged card */
     private int sourceCardIndex;
 
+    /**
+     * Handles onmousepressed event on card ImageView. Possible moves are calculated here and are valid until drop event.
+     * @param mouseEvent self explanatory
+     */
     private void beginDragDrop(MouseEvent mouseEvent) {
         ImageView sender = (ImageView)mouseEvent.getSource();
         xPixelsInside = mouseEvent.getSceneX() - sender.getLayoutX();
@@ -81,7 +120,7 @@ public class GameLayoutController implements Initializable {
         sourcePileIndex = senderPileIndex((ImageView)mouseEvent.getSource());
         sourceCardIndex = -1;
         if(sourcePileIndex < 7 && sourcePileIndex >= 0) // stack
-            sourceCardIndex = senderStackCardIndex(sourcePileIndex, sender);
+            sourceCardIndex = cardStacks.get(sourcePileIndex).indexOf(sender);
         calculateDropSites();
         sender.toFront();
         if(sourceCardIndex >= 0)
@@ -91,6 +130,10 @@ public class GameLayoutController implements Initializable {
             dropsiteCenters.set(sourcePileIndex, null); // prevent highlighting of source pile
     }
 
+    /**
+     * Handles onmousedragged event on card ImageViews. Highlights target stack, if card is hovering over target of legal move.
+     * @param mouseEvent self explanatory.
+     */
     private void dragDrop(MouseEvent mouseEvent) {
         ImageView source = ((ImageView)mouseEvent.getSource());
         if(sourceCardIndex >= 0)
@@ -110,6 +153,12 @@ public class GameLayoutController implements Initializable {
         }
     }
 
+    /**
+     * Handles onmousereleased event on card ImageView. If there is a visible highlight, it disappears. If card was hovering
+     * over target that represents illegal move, card is moved to its source. If legas move was performed, game model
+     * is notified.
+     * @param mouseEvent self explanatory.
+     */
     private void endDragDrop(MouseEvent mouseEvent) {
         ImageView source = ((ImageView)mouseEvent.getSource());
         for(int i = 0; i < 11; i++) {
@@ -169,6 +218,9 @@ public class GameLayoutController implements Initializable {
             gameWon();
     }
 
+    /**
+     * Shows fancy messagebox to user, when the game is over.
+     */
     private void gameWon() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Done!");
@@ -184,6 +236,11 @@ public class GameLayoutController implements Initializable {
         OnGameExit();
     }
 
+    /**
+     * Decides over which possible target the card is currently hovering.
+     * @param pos Position of hovering card.
+     * @return index to array of ImageViews representing highlight, so that the highlight can be shown.
+     */
     private int getOverlayIndex(Point pos) {
         int min = Integer.MAX_VALUE;
         int minIndex = -1;
@@ -205,6 +262,9 @@ public class GameLayoutController implements Initializable {
         return -1;
     }
 
+    /**
+     * Calculates centers of drop places for valid moves. For invalid moves, null is added at drop place's index.
+     */
     private void calculateDropSites() {
         ImageView site;
         dropsiteCenters.clear();
@@ -218,7 +278,6 @@ public class GameLayoutController implements Initializable {
                 canMove = game.canMoveToStack(i);
             if(canMove) {
                 site = dropSites.get(i);
-                //site.setVisible(true);
                 site.toFront();
                 site.setLayoutX(xCoords[i]);
                 if (cardStacks.get(i).size() == 0)
@@ -237,7 +296,6 @@ public class GameLayoutController implements Initializable {
                 canMove = game.canMoveToFoundation(i - 7);
             if(canMove) {
                 site = dropSites.get(i);
-                //site.setVisible(true);
                 site.toFront();
                 site.setLayoutX(xCoords[i - 4]);
                 site.setLayoutY(SPACING + (maxSizeY - cardHeight) / 2);
@@ -246,6 +304,11 @@ public class GameLayoutController implements Initializable {
         }
     }
 
+    /**
+     * Determines index of stack/foundation for specified card ImageView.
+     * @param sender input imageview
+     * @return
+     */
     private int senderPileIndex(ImageView sender) {
         if(sourcePileCards.contains(sender))
             return -1; // sourcePile
@@ -260,13 +323,16 @@ public class GameLayoutController implements Initializable {
         return -1;
     }
 
-    private int senderStackCardIndex(int i, ImageView sender){
-        return cardStacks.get(i).indexOf(sender);
-    }
+    /* ********* Drag&drop logic end ******** */
 
-    /********** Drag&drop logic end *********/
-
-    private void turnOver(MouseEvent mouseEvent){
+    /**
+     * Handles click event on face down pile placeholder. Sends message to the game object to deal new card
+     * (or to turn over the pile). Facedown pile is recreated according to game model. When a card is dealed, its
+     * ImageView is created with appropriate handlers set.
+     *
+     * @param e unused
+     */
+    private void turnOver(MouseEvent e) {
         game.turnCard();
         constructFaceDownPile();
         SourcePile pile = game.getSourcePile();
@@ -284,6 +350,11 @@ public class GameLayoutController implements Initializable {
         placeAll();
     }
 
+    /**
+     * Initialization method of controller. Does the work that is independent on Game model initialization method.
+     * @param url unused
+     * @param rb unused
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         /* bind window resize listeners */
@@ -323,17 +394,28 @@ public class GameLayoutController implements Initializable {
         }
     }
 
+    /**
+     * Initializes UI with newly created game. Random seed is used.
+     */
     public void initializeNewGame() {
         game = new Game();
         reconstructTable();
     }
 
+    /**
+     * Initializes UI with existing instance of Game model. This is used when loading previously saved game.
+     * @param savedGame Instance of game to be used.
+     */
     public void initializeWithGame(Game savedGame) {
         /* create new game with given file */
         game = savedGame;
         reconstructTable();
     }
 
+    /**
+     * Initializes game with given seed that user entered in enclosing scene ( MainWindow ).
+     * @param seed user-entered seed
+     */
     public void initializeWithSeed(String seed) {
         /* create new game with given seed*/
         if(seed.isEmpty())
@@ -343,6 +425,10 @@ public class GameLayoutController implements Initializable {
         reconstructTable();
     }
 
+    /**
+     * Creates new ImageViews of cards inside target pile with specified index according to game model
+     * @param i Index of target pile to be reconstructed
+     */
     private void constructTargetPile(int i) {
     	ArrayList<ImageView> targetPile = cardTargetPiles.get(i);
         for(ImageView image : cardTargetPiles.get(i))
@@ -360,6 +446,10 @@ public class GameLayoutController implements Initializable {
     	}
     }
 
+    /**
+     * Creates new ImageViews of cards inside card stack with specified index according to game model
+     * @param i Index of card stack to be reconstructed
+     */
     private void constructStack(int i) {
 		ArrayList<ImageView> cardStack = cardStacks.get(i);
         for(ImageView image : cardStacks.get(i))
@@ -379,6 +469,9 @@ public class GameLayoutController implements Initializable {
         }
     }
 
+    /**
+     * Sets image of facedown pile placeholder according to game model (either empty placeholder or cardback).
+     */
     private void constructFaceDownPile() {
         FaceDownPile pile = game.getFaceDownPile();
         if(pile.size() == 0)
@@ -387,6 +480,9 @@ public class GameLayoutController implements Initializable {
             faceDownPilePlaceholder.setImage(ImageResources.get().cardImages.get("X(X)"));
     }
 
+    /**
+     * Creates new ImageViews of cards in source pile according to game model.
+     */
     private void constructSourcePile() {
         for(ImageView image : sourcePileCards)
             playingTable.getChildren().remove(image);
@@ -403,6 +499,9 @@ public class GameLayoutController implements Initializable {
         }
     }
 
+    /**
+     * Method that does placement of all ImageViews inside pane. It is intended to be used after calculateProportions.
+     */
     private void placeAll() {
         calculateProportions();
         redeals.setText("Redeals left: " + game.getRedealsLeft());
@@ -416,6 +515,9 @@ public class GameLayoutController implements Initializable {
         placeSourcePile();
     }
 
+    /**
+     * Moves placeholder of facedown pile according to calculated variables related to positioning.
+     */
     private void placeFaceDownPlaceholder() {
         faceDownPilePlaceholder.setFitHeight(cardHeight);
         faceDownPilePlaceholder.setFitWidth(cardWidth);
@@ -423,6 +525,12 @@ public class GameLayoutController implements Initializable {
         faceDownPilePlaceholder.setLayoutX(xCoords[0]);
     }
 
+    /**
+     * Moves card stack placeholder and cards inside stack with specified index according to proportions
+     * calculated in variables related to positioning. This method is intended to be used after calling
+     * calculateProportions.
+     * @param i index of target pile to be moved
+     */
     private void placeStack(int i) {
         stackPlaceholders.get(i).setFitWidth(cardWidth);
         stackPlaceholders.get(i).setFitHeight(cardHeight);
@@ -441,6 +549,13 @@ public class GameLayoutController implements Initializable {
         site.setFitWidth(cardWidth);
     }
 
+
+    /**
+     * Moves target pile placeholder and cards inside target pile with specified index according to proportions
+     * calculated in variables related to positioning. This method is intended to be used after calling
+     * calculateProportions.
+     * @param i index of target pile to be moved
+     */
     private void placeTargetPile(int i) {
         ImageView img = targetPlaceholders.get(i);
         img.setLayoutX(xCoords[i+3]);
@@ -461,6 +576,11 @@ public class GameLayoutController implements Initializable {
         site.setFitWidth(cardWidth);
     }
 
+    /**
+     * Moves ImageViews of card placeholder and cards inside source pile according to proportions
+     * calculated in variables related to positioning. This method is intended to be used after calling
+     * calculateProportions.
+     */
     private void placeSourcePile() {
         sourcePilePlaceholder.setLayoutX(xCoords[1]);
         sourcePilePlaceholder.setLayoutY(firstRowDecksY);
@@ -476,8 +596,9 @@ public class GameLayoutController implements Initializable {
         }
     }
 
-    /* Calculation of proportions for drawing. */
-
+    /**
+     * Recalculates every position and size needed for card placement inside window.
+     */
     private void calculateProportions() {
         int height = (int)playingTable.getHeight();
         int width = (int)playingTable.getWidth();
@@ -500,6 +621,11 @@ public class GameLayoutController implements Initializable {
         firstRowDecksY = SPACING + (maxSizeY - cardHeight) / 2;
     }
 
+    /**
+     * Recalculates array of X coordinates for each card placeholder in horizontal direction.
+     * @param width width of whole window
+     * @return array of X coordinates
+     */
     private int[] getXcoords(int width) {
         int slice_size = (width - SPACING) / 7;
         int[] arr = new int[7];
@@ -508,6 +634,12 @@ public class GameLayoutController implements Initializable {
         return arr;
     }
 
+    /**
+     * Recalculates array of Y coordinaes which represent positions of cards in card stacks.
+     * @param height    height of window/stage
+     * @param cardHeight    height of card ImageView
+     * @return  array of Y coordinates
+     */
     private int[] getYcoords(int height, int cardHeight) {
         int startPos = (height - 3 * SPACING) / 3 + 2 * SPACING;
         int[] arr = new int[19];
@@ -519,12 +651,20 @@ public class GameLayoutController implements Initializable {
         return arr;
     }
 
-    public void undo(ActionEvent actionEvent) {
+    /**
+     * Handles click event on undo button. Undo is done in the game model using command pattern.
+     * Whole game is GUI does not know anything, so entire table is recreated every time undo is
+     * demanded.
+     */
+    public void undo() {
         game.undo();
         hintIndex = -1;
         reconstructTable();
     }
 
+    /**
+     * Clears card placeholders and creates new ImageViews according to current state of the game.
+     */
     private void reconstructTable() {
         for(int i = 0; i < 7; i++)
             constructStack(i);
@@ -537,6 +677,10 @@ public class GameLayoutController implements Initializable {
         placeAll();
     }
 
+    /**
+     * Handles click event on hint button. More information on finding possible moves is explained
+     * in docs for Game.getHints method. Cycles through available hints when clicks are repeated.
+     */
     public void hintClick() {
         if(hintIndex < 0) { // if we haven't asked for hints in this turn yet
             hints = game.getHints();
@@ -556,6 +700,9 @@ public class GameLayoutController implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Handles event when user clicks on save button. Game is saved using serializable.
+     */
     public void saveClick() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Game");
@@ -574,20 +721,37 @@ public class GameLayoutController implements Initializable {
         }
     }
 
-    public void copySeed(ActionEvent actionEvent) {
+    /**
+     * Handles onclick event on clipboard button, inserts given seed into clipboard.
+     */
+    public void copySeed() {
         Clipboard cb = Clipboard.getSystemClipboard();
         ClipboardContent c = new ClipboardContent();
         c.putString(game.getSeed());
         cb.setContent(c);
     }
 
+    /**
+     *  Small class representing 2D points in calculations.
+     */
     private class Point {
         int x,y;
+
+        /**
+         * Initializes new point with given coordinates
+         * @param x x coordinate
+         * @param y y coordinate
+         */
         Point(int x, int y) {
             this.x = x;
             this.y = y;
         }
 
+        /**
+         * Calculates discance between current point and point passed in parameter.
+         * @param p other point
+         * @return distance
+         */
         int distance(Point p) {
             int dx = this.x - p.x, dy = this.y - p.y;
             return dx*dx + dy*dy;
