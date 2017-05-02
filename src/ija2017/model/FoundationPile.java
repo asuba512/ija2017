@@ -1,9 +1,15 @@
 package ija2017.model;
 
 /**
- * Created by xsubaa00 on 10/04/17.
+ * Class representing single foundation deck of cards.
+ * @author Adam Suba (xsubaa00)
  */
 public class FoundationPile extends CardDeck {
+    /**
+     * Puts single card onto foundation. Respects rules of foundation. First Ace may be of any color.
+     * @param c Card to be inserted.
+     * @return True if card was inserted, false otherwise.
+     */
     @Override
     public boolean put(Card c){
         if (this.deck.isEmpty())
@@ -13,7 +19,12 @@ public class FoundationPile extends CardDeck {
         return false;
     }
 
-    public boolean canAccept(Card c){
+    /**
+     * Checks whether card can be placed on foundation deck.
+      * @param c Card to be checked.
+     * @return True if it is possible, false otherwise.
+     */
+    boolean canAccept(Card c){
         if(c == null)
             return false;
         if(this.deck.isEmpty())

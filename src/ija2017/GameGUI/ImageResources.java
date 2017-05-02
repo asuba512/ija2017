@@ -9,7 +9,7 @@ import java.util.HashMap;
  *
  * @author Jakub Paliesek (xpalie00)
  */
-public class ImageResources {
+class ImageResources {
     /** holds cards that can be searched by their ingame names (from hw1/hw2 */
     HashMap<String,Image> cardImages = new HashMap<>();
     /** holds placeholder image */
@@ -21,8 +21,10 @@ public class ImageResources {
 
     private static ImageResources ourInstance = new ImageResources();
 
-    /** provides instance of singleton */
-    public static ImageResources get() {
+    /**
+     * @return instance of singleton
+     */
+    static ImageResources get() {
         return ourInstance;
     }
 

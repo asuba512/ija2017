@@ -180,6 +180,10 @@ public class MainWindowController implements Initializable, GameExitHandler {
         if(freeSpot != null) {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open saved game");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Solitaire saved game", "*.save"),
+                    new FileChooser.ExtensionFilter("All Files", "*.*")
+            );
             File selectedFile = fileChooser.showOpenDialog(gameGrid.getScene().getWindow());
             if (selectedFile == null)
                 return;
@@ -191,7 +195,7 @@ public class MainWindowController implements Initializable, GameExitHandler {
                 in.close();
                 fileIn.close();
             } catch (Exception e) {
-                showErrorDialog("File loading error", "Error loading savegame file. Is file in correct format and accessible?");
+                showErrorDialog();
                 return;
             }
             setSmallerGame();
@@ -225,6 +229,8 @@ public class MainWindowController implements Initializable, GameExitHandler {
 
     /**
      * Maximizes game at given [row, col]
+     * @param row row of game
+     * @param  col column of game
      */
     private void setBiggerGame(int row, int col) {
         gameGrid.setVgap(0.0);
@@ -281,14 +287,12 @@ public class MainWindowController implements Initializable, GameExitHandler {
 
     /**
      * Pops up a generic error dialog
-     * @param header Text of hader.
-     * @param text Text of dialog contents.
      */
-    private void showErrorDialog(String header, String text) {
+    private void showErrorDialog() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(header);
+        alert.setTitle("File loading error");
         alert.setHeaderText(null);
-        alert.setContentText(text);
+        alert.setContentText("Error loading savegame file. Is file in correct format and accessible?");
         alert.showAndWait();
     }
 

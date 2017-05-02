@@ -74,6 +74,7 @@ public class GameLayoutController implements Initializable {
 
     /**
      * Adds new subscriber of custom game exit event that is fired when Cancel game button is clicked
+     * @param handler handler to be added
      */
     public void addExitHandler(GameExitHandler handler) {
         gameExitHandlers.add(handler);
@@ -307,7 +308,7 @@ public class GameLayoutController implements Initializable {
     /**
      * Determines index of stack/foundation for specified card ImageView.
      * @param sender input imageview
-     * @return
+     * @return index of stack/foundation, -1 if not found
      */
     private int senderPileIndex(ImageView sender) {
         if(sourcePileCards.contains(sender))
@@ -586,8 +587,7 @@ public class GameLayoutController implements Initializable {
         sourcePilePlaceholder.setLayoutY(firstRowDecksY);
         sourcePilePlaceholder.setFitWidth(cardWidth);
         sourcePilePlaceholder.setFitHeight(cardHeight);
-        for(int i = 0; i < sourcePileCards.size(); i++) {
-            ImageView sourcePileCard = sourcePileCards.get(i);
+        for (ImageView sourcePileCard : sourcePileCards) {
             sourcePileCard.toFront();
             sourcePileCard.setLayoutY(firstRowDecksY);
             sourcePileCard.setLayoutX(xCoords[1]);
@@ -705,18 +705,21 @@ public class GameLayoutController implements Initializable {
      */
     public void saveClick() {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Solitaire saved game", "*.save"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+        fileChooser.setInitialFileName("*.save");
         fileChooser.setTitle("Save Game");
         File file = fileChooser.showSaveDialog(gameRootPane.getScene().getWindow());
         if (file != null) {
             try {
-                file.createNewFile();
                 FileOutputStream fileOut = new FileOutputStream(file, false); // false = do not append
                 ObjectOutputStream oos = new ObjectOutputStream(fileOut);
                 oos.writeObject(game);
                 oos.close();
                 fileOut.close();
-            } catch(IOException e) {
-                return;
+            } catch(IOException ignored) {
             }
         }
     }
